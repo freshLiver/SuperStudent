@@ -2,7 +2,7 @@ from os import path
 from pydub import AudioSegment
 
 # project libs
-from botlib.botconfig import BotConfig
+from botlib import BotConfig
 from botlib.botlogger import BotLogger
 
 # flask

@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
 # project libs
-from botlib.botconfig import BotConfig
+from botlib import BotConfig
 from botlib.botlogger import BotLogger
 from botlib.api.lineapi import LineApi
 
