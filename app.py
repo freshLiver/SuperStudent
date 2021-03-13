@@ -6,12 +6,12 @@ from botlib.botlogger import BotLogger
 from botlib.api.lineapi import LineApi
 
 # flask libs
-from flask import abort, Flask, request
+from flask import abort, Flask, request, send_from_directory
 
 # line bot apis
 from linebot import LineBotApi, WebhookHandler, WebhookParser
 from linebot.exceptions import InvalidSignatureError
-from linebot.models import MessageEvent, TextMessage
+from linebot.models import MessageEvent, AudioMessage
 
 
 
@@ -29,30 +29,42 @@ def callback() :
     signature = request.headers['X-Line-Signature']
     body = request.get_data(as_text = True)
     BotLogger.log_debug(f"Get Request Body done, \n=> {body}")
-    
+
     # parse webhook body
-    events = None
     try :
         events = parser.parse(body, signature)
-        BotLogger.log_debug("signature parse done")
+        # if event is MessageEvent and message is TextMessage
+        for event in events :
+            # should be message event
+            if not isinstance(event, MessageEvent) :
+                BotLogger.log_error("Not A MessageEvent, Ignored.")
+                continue
+
+            # check message type
+            if isinstance(event.message, AudioMessage) :
+                # save audio message as a file
+                tmp_file = LineApi.save_audio_message(event.source.user_id, event.message, line_bot_api)
+
+                # send back same audio message
+                LineApi.send_audio(BotConfig.get_channel_token(), event.reply_token, tmp_file)
 
     # parse bot event failed
     except InvalidSignatureError as e :
         BotLogger.log_exception(f"InvalidSignatureError : {e}")
         abort(400)
-    
-    # if event is MessageEvent and message is TextMessage
-    for event in events :
-        # should be message event
-        if not isinstance(event, MessageEvent) :
-            BotLogger.log_error("not message event, ignore")
-            continue
-        
-        # check message type
-        if isinstance(event.message, TextMessage) :
-            LineApi.send_text(BotConfig.get_channel_token(), event.reply_token, event.message.text)
-    
+
     return "OK"
+
+
+@app.route(f"/audio/<path:filename>")
+def audio( filename ) :
+    try :
+        BotLogger.log_info(f"Audio Request : audio/{filename}")
+        return send_from_directory(BotConfig.get_audio_input_dir(), filename)
+
+    except Exception as e :
+        BotLogger.log_exception(f"Except While Getting Audio File: {e}")
+        return None
 
 
 if __name__ == "__main__" :
