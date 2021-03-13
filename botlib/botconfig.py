@@ -17,23 +17,26 @@ class BotConfig :
     
     # abs path for saving audio messages received from user
     __AUDIO_MESSAGE_TMP_DIR = path.join(__PROJECT_ROOT, "audio_input_tmp")
-    
+
     # try to create input audio message tmp dir
     system(f"mkdir {__AUDIO_MESSAGE_TMP_DIR}")
-    
+
     # abs path of .env file
     __ENV_FILE_PATH = path.join(__PROJECT_ROOT, ".env")
-    
+
     # load .env file of this project
     __ENV_FILE = env_file.get(__ENV_FILE_PATH)
-    
+
     # LINE BOT Channel Token & Secret
-    __LINE_CHANNEL_TOKEN = __ENV_FILE.get("line_channel_access_token")
-    __LINE_CHANNEL_SECRET = __ENV_FILE.get("line_channel_secret")
-    
-    
+    __LINE_CHANNEL_TOKEN = str(__ENV_FILE.get("line_channel_access_token"))
+    __LINE_CHANNEL_SECRET = str(__ENV_FILE.get("line_channel_secret"))
+
+    # flask port
+    __PORT = int(7777)
+
+
     # --------------------------------------------------------------------------------------------------------
-    
+
     @staticmethod
     def get_project_root() :
         """
@@ -51,9 +54,9 @@ class BotConfig :
         
         :return: channel token string
         """
-        return str(BotConfig.__LINE_CHANNEL_TOKEN)
-    
-    
+        return BotConfig.__LINE_CHANNEL_TOKEN
+
+
     @staticmethod
     def get_channel_secret() -> str :
         """
@@ -61,4 +64,14 @@ class BotConfig :
         
         :return: channel secret string
         """
-        return str(BotConfig.__LINE_CHANNEL_SECRET)
+        return BotConfig.__LINE_CHANNEL_SECRET
+
+
+    @staticmethod
+    def get_flask_app_port() -> int :
+        """
+        get port number of this flask app
+        
+        :return: port number
+        """
+        return BotConfig.__PORT
