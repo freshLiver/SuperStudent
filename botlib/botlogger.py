@@ -1,10 +1,14 @@
 import logging
+from botlib import BotConfig
 
 
 
 class BotLogger :
     # -------------------------------------------- class variables  --------------------------------------------
-    logging.basicConfig(level = logging.INFO, format = "%(message)s")
+    __LOGGER_MODE = logging.INFO
+    __LOGGER_FORMAT = "%(message)s"
+
+    logging.basicConfig(level = __LOGGER_MODE, format = __LOGGER_FORMAT)
     __LOGGER = logging.getLogger()
 
 
