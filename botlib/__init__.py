@@ -1,5 +1,6 @@
 import env_file
-from os import path, system
+from os import system
+from os.path import expanduser, join
 from pathlib import Path
 
 
@@ -13,16 +14,16 @@ class BotConfig :
     __THIS_FILE = Path(__file__)
 
     # project root dir abs path
-    __PROJECT_ROOT = path.abspath(__THIS_FILE.parent.parent)
+    __PROJECT_ROOT = expanduser(__THIS_FILE.parent.parent)
 
     # abs path for saving audio messages received from user
-    __AUDIO_INPUT_TMP = path.join(__PROJECT_ROOT, "audio_input_tmp")
+    __AUDIO_INPUT_TMP = join(__PROJECT_ROOT, "audio_input_tmp")
 
     # try to create input audio message tmp dir
     system(f"mkdir {__AUDIO_INPUT_TMP}")
 
     # abs path of .env file
-    __ENV_FILE_PATH = path.join(__PROJECT_ROOT, ".env")
+    __ENV_FILE_PATH = join(__PROJECT_ROOT, ".env")
 
     # load .env file of this project
     __ENV_FILE = env_file.get(__ENV_FILE_PATH)
@@ -39,7 +40,7 @@ class BotConfig :
     # --------------------------------------------------------------------------------------------------------
 
     @staticmethod
-    def get_project_root() :
+    def get_project_root() -> str :
         """
         get absolute path of the root dir of this project
 
@@ -94,13 +95,18 @@ class BotConfig :
 
 
     @staticmethod
-    def file_path_from( target_dir: str, filename: str, postfix = ".input" ) -> str :
+    def file_path_from( target_dir: str, filename: str, postfix = ".input" ) -> Path :
         """
         get full file path from target dir
 
         :param target_dir: full path of target dir
         :param filename: filename (without parent dir name and postfix)
         :param postfix: filename postfix
-        :return: file full path
+        :return: Path obj of this file
         """
-        return path.join(target_dir, f"{filename}{postfix}")
+
+        # get file path
+        file_path = join(target_dir, f"{filename}{postfix}")
+
+        # return Path obj
+        return Path(expanduser(file_path))

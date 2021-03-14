@@ -1,9 +1,12 @@
 from os import path
+from os.path import expanduser
+from pathlib import Path
 from pydub import AudioSegment
 
 # project libs
 from botlib import BotConfig
 from botlib.botlogger import BotLogger
+from botlib.converter.audio_converter import AudioConvert
 
 # flask
 from flask import request
@@ -71,14 +74,15 @@ class LineApi :
 
 
     @staticmethod
-    def save_audio_message( userid: str, audio_message: AudioMessage, line_bot_api: LineBotApi ) -> str :
+    def save_audio_message_as_wav( userid: str, audio_message: AudioMessage, line_bot_api: LineBotApi ) -> Path :
         """
-        save audio message as a file to default dir, and named as $userid$postfix
+        save audio message as wav file to audio input tmp dir
+        and this audio message will be named after {userid}{postfix}
         
         :param userid: line user id
         :param audio_message: audio message received from user
         :param line_bot_api: line bot api create in app.py
-        :return: full path of tmp audio file
+        :return: full path of tmp wav audio file
         """
 
         # read audio message content(bin)
@@ -92,6 +96,9 @@ class LineApi :
             for chunk in audio_message_content.iter_content() :
                 tmp_file.write(chunk)
 
+        BotLogger.log_info(f"Audio Message (m4a) Saved To {tmp_path}.")
+
+        # TODO convert m4a audio message file to wav file
+
         # return full path of the input audio file
-        BotLogger.log_info(f"Audio Message Saved To {tmp_path}.")
-        return tmp_path
+        return Path(expanduser(tmp_path))

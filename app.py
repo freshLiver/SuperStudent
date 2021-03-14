@@ -1,9 +1,12 @@
 from __future__ import unicode_literals
+from pathlib import Path
 
 # project libs
 from botlib import BotConfig
 from botlib.botlogger import BotLogger
 from botlib.api.lineapi import LineApi
+from botlib.converter.audio_converter import AudioConvert
+from botlib.converter.speech_to_text import SpeechToText
 
 # flask libs
 from flask import abort, Flask, request, send_from_directory
@@ -43,10 +46,30 @@ def callback() :
             # check message type
             if isinstance(event.message, AudioMessage) :
                 # save audio message as a file
-                tmp_file = LineApi.save_audio_message(event.source.user_id, event.message, line_bot_api)
+                m4a_tmp_path = LineApi.save_audio_message_as_wav(event.source.user_id, event.message, line_bot_api)
+
+                # convert tmp m4a to wav for stt
+                wav_tmp_path = AudioConvert.m4a_to_wav(m4a_tmp_path)
+
+                # do STT
+                text = SpeechToText.chinese_to_cht(wav_tmp_path)
+
+                # default error response
+                response = "無法辨識內容，請再說一遍"
+
+                # TODO parse text and get response
+                if text is not None :
+                    pass
+
+                # do response tts
+                # response_wav_path = Path("")
+
+                # convert wav to m4a
+                # response_m4a_path = AudioConvert.wav_to_m4a(response_wav_path)
+
 
                 # send back same audio message
-                LineApi.send_audio(BotConfig.get_channel_token(), event.reply_token, tmp_file)
+                # LineApi.send_audio(BotConfig.get_channel_token(), event.reply_token, m4a_tmp_path)
 
     # parse bot event failed
     except InvalidSignatureError as e :
