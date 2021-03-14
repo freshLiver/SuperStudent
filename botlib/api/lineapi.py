@@ -7,6 +7,7 @@ from pydub import AudioSegment
 from botlib import BotConfig
 from botlib.botlogger import BotLogger
 from botlib.converter.audio_converter import AudioConvert
+from botlib.converter.text_to_speech import TextToSpeech
 
 # flask
 from flask import request
@@ -41,36 +42,36 @@ class LineApi :
 
 
     @staticmethod
-    def send_audio( channel_token, reply_token, file_path: str ) -> None :
+    def send_audio( channel_token, reply_token, file_path: Path ) -> None :
         """
         Simplified AudioSendMessage Line api
         
         :param channel_token: line bot channel token
         :param reply_token: reply token
-        :param file_path: Audio Message Source File
+        :param file_path: Audio Message Source File Path Obj
         :return: None
         """
 
         try :
-            # get filename by os.path.basename
-            filename = path.basename(file_path)
-
             # get audio file duration
-            audio_url = path.join(request.host_url, "audio", filename).replace("http://", "https://")
             audio_duration = AudioSegment.from_file(file_path).duration_seconds * 1000
 
-            # reply audio file with duration
+            # reply audio file (by url) with duration
+            audio_url = path.join(request.host_url, "audio", file_path.name).replace("http://", "https://")
             api = LineBotApi(channel_access_token = channel_token)
             api.reply_message(reply_token, AudioSendMessage(audio_url, duration = audio_duration))
 
             BotLogger.log_info(f"Audio Message '{file_path}' Sent.")
 
         except FileNotFoundError as fe :
-            BotLogger.log_exception(f"{file_path} FileNotFound : {fe}")
+            BotLogger.log_exception(f"Send Audio Failed, {file_path} FileNotFound : {fe}")
 
         except TypeError as te :
-            BotLogger.log_exception(f"{file_path} TypeError : {te}")
+            BotLogger.log_exception(f"Send Audio Failed, {file_path} TypeError : {te}")
 
+
+
+    # -------------------------------------------------------------------------------------------------------
 
 
     @staticmethod
