@@ -8,8 +8,8 @@ line-bot-sdk = "*"
 flask = "*"
 pydub = "*"
 speechrecognition = "*"
-gtts = "*"
 env-file = "*"
+gtts = "*"
 
 [dev-packages]
 

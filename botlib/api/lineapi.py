@@ -69,13 +69,41 @@ class LineApi :
         except TypeError as te :
             BotLogger.log_exception(f"Send Audio Failed, {file_path} TypeError : {te}")
 
+        except Exception as e :
+            BotLogger.log_exception(f"Send Audio Failed, {type(e).__name__} : {e}")
+
+
+
+    @staticmethod
+    def send_audio_by_text( channel_token, reply_token, userid: str, msg: str ) -> None :
+        """
+        Send a Audio Message Made By msg TTS To User
+
+        :param channel_token: line bot channel token
+        :param reply_token: reply token
+        :param userid: user line id to determine tmp file name
+        :param msg: text message that will be heard by user
+        :return: None
+        """
+
+        # tts to wav file
+        wav_tts_path = TextToSpeech.cht_to_chinese(userid, msg)
+
+        # convert wav tts audio to m4a audio
+        m4a_response_file_path = AudioConvert.wav_to_m4a(wav_tts_path)
+
+        # reply this audio message
+        LineApi.send_audio(channel_token, reply_token, m4a_response_file_path)
+
+        BotLogger.log_info(f"Send Text {msg} As Audio File : {m4a_response_file_path}")
+
 
 
     # -------------------------------------------------------------------------------------------------------
 
 
     @staticmethod
-    def save_audio_message_as_wav( userid: str, audio_message: AudioMessage, line_bot_api: LineBotApi ) -> Path :
+    def save_audio_message_as_m4a( userid: str, audio_message: AudioMessage, line_bot_api: LineBotApi ) -> Path :
         """
         save audio message as wav file to audio input tmp dir
         and this audio message will be named after {userid}{postfix}
@@ -90,16 +118,14 @@ class LineApi :
         audio_message_content = line_bot_api.get_message_content(audio_message.id)
 
         # where this audio should be saved
-        tmp_path = BotConfig.file_path_from(BotConfig.get_audio_input_dir(), userid)
+        m4a_tmp_path = BotConfig.file_path_from(BotConfig.get_audio_input_dir(), userid)
 
         # write audio message content to tmp file
-        with open(tmp_path, 'wb') as tmp_file :
+        with open(m4a_tmp_path, 'wb') as tmp_file :
             for chunk in audio_message_content.iter_content() :
                 tmp_file.write(chunk)
 
-        BotLogger.log_info(f"Audio Message (m4a) Saved To {tmp_path}.")
-
-        # TODO convert m4a audio message file to wav file
+        BotLogger.log_info(f"Audio Message Saved as m4a At {m4a_tmp_path}.")
 
         # return full path of the input audio file
-        return Path(expanduser(tmp_path))
+        return Path(expanduser(m4a_tmp_path))

@@ -18,9 +18,11 @@ class BotConfig :
 
     # abs path for saving audio messages received from user
     __AUDIO_INPUT_TMP = join(__PROJECT_ROOT, "audio_input_tmp")
+    __AUDIO_OUTPUT_TMP = join(__PROJECT_ROOT, "audio_output_tmp")
 
     # try to create input audio message tmp dir
     system(f"mkdir {__AUDIO_INPUT_TMP}")
+    system(f"mkdir {__AUDIO_OUTPUT_TMP}")
 
     # abs path of .env file
     __ENV_FILE_PATH = join(__PROJECT_ROOT, ".env")
@@ -83,6 +85,9 @@ class BotConfig :
 
 
 
+    # -------------------------------------------------------------------------------------------------------
+
+
     @staticmethod
     def get_audio_input_dir() -> str :
         """
@@ -92,6 +97,20 @@ class BotConfig :
         """
         return BotConfig.__AUDIO_INPUT_TMP
 
+
+
+    @staticmethod
+    def get_audio_output_dir() -> str :
+        """
+        get full path audio output tmp dir
+
+        :return: audio output tmp dir path
+        """
+        return BotConfig.__AUDIO_OUTPUT_TMP
+
+
+
+    # -------------------------------------------------------------------------------------------------------
 
 
     @staticmethod
@@ -110,3 +129,6 @@ class BotConfig :
 
         # return Path obj
         return Path(expanduser(file_path))
+
+
+    # -------------------------------------------------------------------------------------------------------
