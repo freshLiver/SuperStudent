@@ -6,6 +6,8 @@ from botlib.api.lineapi import LineApi
 from botlib.botlogger import BotLogger
 from botlib.converter.audio_converter import AudioConvert
 from botlib.converter.speech_to_text import SpeechToText
+from botlib.services import service_matching
+from botlib.semantic_analyzer import SemanticAnalyzer
 
 # flask libs
 from flask import abort, Flask, request, send_from_directory
@@ -70,6 +72,15 @@ def callback() :
 
                 # parse content and get response
                 if speech_text is not None :
+                    # parse user's speech content
+                    analyzer = SemanticAnalyzer(speech_text)
+                    analyzer.parse_content()
+
+                    # get response base on analyze result
+                    response_text = service_matching(analyzer = analyzer)
+
+                # send response (None for no response)
+                if response_text is not None :
                     LineApi.make_audio_message_and_send(channel_token, reply_token, userid, response_text)
 
     # parse bot event failed
