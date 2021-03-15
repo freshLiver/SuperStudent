@@ -2,8 +2,8 @@ from __future__ import unicode_literals
 
 # project libs
 from botlib import BotConfig
-from botlib.botlogger import BotLogger
 from botlib.api.lineapi import LineApi
+from botlib.botlogger import BotLogger
 from botlib.converter.audio_converter import AudioConvert
 from botlib.converter.speech_to_text import SpeechToText
 
@@ -46,9 +46,10 @@ def callback() :
             # check message type
             if isinstance(event.message, AudioMessage) :
 
-                # get userid
+                # get userid, reply_token, channel_token
                 userid = event.source.user_id
                 reply_token = event.reply_token
+                channel_token = BotConfig.get_channel_token()
 
                 # save audio message as a file
                 m4a_tmp_path = LineApi.save_audio_message_as_m4a(userid, event.message, line_bot_api)
@@ -64,22 +65,12 @@ def callback() :
 
                 # stt error, send response audio message
                 if speech_text is None :
-                    LineApi.send_audio_by_text(BotConfig.get_channel_token(), reply_token, userid, response_text)
+                    LineApi.make_audio_message_and_send(channel_token, reply_token, userid, response_text)
                     continue
 
-                # TODO parse text and get response
+                # parse content and get response
                 if speech_text is not None :
-                    # TEST reply stt content with tts
-                    LineApi.send_audio_by_text(BotConfig.get_channel_token(), reply_token, userid, speech_text)
-
-                # do response tts
-                # response_wav_path = Path("")
-
-                # convert wav to m4a
-                # response_m4a_path = AudioConvert.wav_to_m4a(response_wav_path)
-
-                # send back same audio message
-                # LineApi.send_audio(BotConfig.get_channel_token(), event.reply_token, m4a_tmp_path)
+                    LineApi.make_audio_message_and_send(channel_token, reply_token, userid, response_text)
 
     # parse bot event failed
     except InvalidSignatureError as e :

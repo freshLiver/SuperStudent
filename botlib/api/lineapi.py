@@ -75,7 +75,7 @@ class LineApi :
 
 
     @staticmethod
-    def send_audio_by_text( channel_token, reply_token, userid: str, msg: str ) -> None :
+    def make_audio_message_and_send( channel_token, reply_token, userid: str, msg: str ) -> None :
         """
         Send a Audio Message Made By msg TTS To User
 
