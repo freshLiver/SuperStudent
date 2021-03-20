@@ -13,7 +13,7 @@ class LabApi :
     @staticmethod
     def __format_data( token: str, raw_data: str ) -> bytes :
         """
-        convert raw data to wmmks lab's api format
+        convert raw data to WMMKS Lab's api format
         
         :param token: user api token
         :param raw_data: data will be send to server
@@ -140,5 +140,7 @@ class LabApi :
 
 
 if __name__ == '__main__' :
-    res = LabApi.lab_ner_api("今天成功大學有活動")
-    print(res)
+    from pprint import pprint
+    
+    res = LabApi.lab_ner_api("我想知道今天成功大學的新聞")
+    pprint(res)
