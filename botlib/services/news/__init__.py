@@ -1,4 +1,6 @@
 from enum import Enum
+import datetime
+
 
 
 class AvailableMedia(Enum) :
@@ -10,10 +12,13 @@ class AvailableMedia(Enum) :
     CHINATIME = 1
 
 
-def find_news( datetime: str, keywords: list, media: AvailableMedia ) -> str :
+# ------------------------------------------------------------------------------------------------------------
+
+
+def find_news( time_range: (datetime, datetime), keywords: list, media: AvailableMedia ) -> str :
     """
     
-    :param datetime:
+    :param time_range:
     :param keywords:
     :param media:
     :return:
