@@ -37,7 +37,7 @@ class LineApi :
         """
         api = LineBotApi(channel_access_token = channel_token)
         api.reply_message(reply_token, TextSendMessage(text = msg))
-        BotLogger.log_info(f"successfully send text message : {msg}")
+        BotLogger.info(f"successfully send text message : {msg}")
 
 
 
@@ -61,16 +61,16 @@ class LineApi :
             api = LineBotApi(channel_access_token = channel_token)
             api.reply_message(reply_token, AudioSendMessage(audio_url, duration = audio_duration))
 
-            BotLogger.log_info(f"Audio Message '{file_path}' Sent.")
+            BotLogger.info(f"Audio Message '{file_path}' Sent.")
 
         except FileNotFoundError as fe :
-            BotLogger.log_exception(f"Send Audio Failed, {file_path} FileNotFound : {fe}")
+            BotLogger.exception(f"Send Audio Failed, {file_path} FileNotFound : {fe}")
 
         except TypeError as te :
-            BotLogger.log_exception(f"Send Audio Failed, {file_path} TypeError : {te}")
+            BotLogger.exception(f"Send Audio Failed, {file_path} TypeError : {te}")
 
         except Exception as e :
-            BotLogger.log_exception(f"Send Audio Failed, {type(e).__name__} : {e}")
+            BotLogger.exception(f"Send Audio Failed, {type(e).__name__} : {e}")
 
 
 
@@ -95,7 +95,7 @@ class LineApi :
         # reply this audio message
         LineApi.send_audio(channel_token, reply_token, m4a_response_file_path)
 
-        BotLogger.log_info(f"Send Text {msg} As Audio File : {m4a_response_file_path}")
+        BotLogger.info(f"Send Text {msg} As Audio File : {m4a_response_file_path}")
 
 
 
@@ -125,7 +125,7 @@ class LineApi :
             for chunk in audio_message_content.iter_content() :
                 tmp_file.write(chunk)
 
-        BotLogger.log_info(f"Audio Message Saved as m4a At {m4a_tmp_path}.")
+        BotLogger.info(f"Audio Message Saved as m4a At {m4a_tmp_path}.")
 
         # return full path of the input audio file
         return Path(expanduser(m4a_tmp_path))

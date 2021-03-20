@@ -42,11 +42,11 @@ class SemanticAnalyzer :
 
         # parse speech text with NER
         ner_dict = LabApi.lab_ner_api(self.speech_text)
-        BotLogger.log_debug(f"{{{self.speech_text}:{ner_dict}}}")
+        BotLogger.debug(f"{{{self.speech_text}:{ner_dict}}}")
 
         # ner get nothing
         if ner_dict is None :
-            BotLogger.log_info("NER Error.")
+            BotLogger.info("NER Error.")
 
         # extract info from ner result (if result not None)
         else :
@@ -65,7 +65,7 @@ class SemanticAnalyzer :
             else :
                 self.target_service = Services.UNKNOWN
 
-            BotLogger.log_info("Parsing Speech Text Done.")
+            BotLogger.info("Parsing Speech Text Done.")
 
 
     @staticmethod

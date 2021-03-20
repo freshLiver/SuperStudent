@@ -51,26 +51,26 @@ class LabApi :
         try :
             # connect server with this socket
             api.connect(host_port)
-            BotLogger.log_debug("Connecting To Lab API Done")
+            BotLogger.debug("Connecting To Lab API Done")
             
             # send data to server
             api.sendall(LabApi.__format_data(token = token, raw_data = raw_data))
-            BotLogger.log_debug("Sending Data To Lab API Done.")
+            BotLogger.debug("Sending Data To Lab API Done.")
             
             # recv from server and return data
             response = api.recv(8096)
-            BotLogger.log_debug("Receiving Data From Lab API Done.")
+            BotLogger.debug("Receiving Data From Lab API Done.")
         
         
         except ConnectionError as e :
-            BotLogger.log_exception(f"Lab API Connection Error : {e}")
+            BotLogger.exception(f"Lab API Connection Error : {e}")
         
         except Exception as e :
-            BotLogger.log_exception(f"Exception ({type(e).__name__}) : {e}")
+            BotLogger.exception(f"Exception ({type(e).__name__}) : {e}")
         
         finally :
             api.close()
-            BotLogger.log_debug("Lab API Socket Had Been Closed.")
+            BotLogger.debug("Lab API Socket Had Been Closed.")
         
         # return response or None (Error)
         return response
@@ -96,7 +96,7 @@ class LabApi :
         # decode as utf-8 and convert to dict
         if result is not None :
             result = loads(str(result, "utf-8"))
-            BotLogger.log_info("Getting NER Result From Lab API Done.")
+            BotLogger.info("Getting NER Result From Lab API Done.")
         
         # return result dict
         return result
@@ -134,7 +134,7 @@ class LabApi :
                 return output
             
             except Exception as e :
-                BotLogger.log_exception(f"Exception {type(e).__name__} : {e}")
+                BotLogger.exception(f"Exception {type(e).__name__} : {e}")
         
         return None
 

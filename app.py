@@ -32,7 +32,7 @@ parser = WebhookParser(channel_secret = BotConfig.get_channel_secret())
 def callback() :
     signature = request.headers['X-Line-Signature']
     body = request.get_data(as_text = True)
-    BotLogger.log_debug(f"Get Request Body done, \n=> {body}")
+    BotLogger.debug(f"Get Request Body done, \n=> {body}")
 
     # parse webhook body
     try :
@@ -42,7 +42,7 @@ def callback() :
         for event in events :
             # should be message event
             if not isinstance(event, MessageEvent) :
-                BotLogger.log_error("Not A MessageEvent, Ignored.")
+                BotLogger.error("Not A MessageEvent, Ignored.")
                 continue
 
             # check message type
@@ -68,7 +68,7 @@ def callback() :
                 # stt error, send response audio message
                 if speech_text is None :
                     LineApi.make_audio_message_and_send(channel_token, reply_token, userid, response_text)
-                    BotLogger.log_info("Speech Text Is None.")
+                    BotLogger.info("Speech Text Is None.")
                     continue
 
                 # parse user's speech content and get response
@@ -85,7 +85,7 @@ def callback() :
 
     # parse bot event failed
     except InvalidSignatureError as e :
-        BotLogger.log_exception(f"InvalidSignatureError : {e}")
+        BotLogger.exception(f"InvalidSignatureError : {e}")
         abort(400)
 
     return "OK"
@@ -94,11 +94,11 @@ def callback() :
 @app.route("/audio/<path:filename>")
 def audio( filename ) :
     try :
-        BotLogger.log_info(f"Audio Request : audio/{filename}")
+        BotLogger.info(f"Audio Request : audio/{filename}")
         return send_from_directory(BotConfig.get_audio_output_dir(), filename)
 
     except Exception as e :
-        BotLogger.log_exception(f"Getting Audio File Error : {type(e).__name__} \n{e}")
+        BotLogger.exception(f"Getting Audio File Error : {type(e).__name__} \n{e}")
         return None
 
 

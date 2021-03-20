@@ -10,9 +10,9 @@ def create_activity( people: list, events: list, time_range: (datetime, datetime
 
 
 def find_activity( people: list, events: list, time_range: (datetime, datetime), location: list ) -> str :
-    BotLogger.log_debug(f"people : {people}")
-    BotLogger.log_debug(f"events : {events}")
-    BotLogger.log_debug(f"time_range : {time_range}")
-    BotLogger.log_debug(f"location : {location}")
+    BotLogger.debug(f"people : {people}")
+    BotLogger.debug(f"events : {events}")
+    BotLogger.debug(f"time_range : {time_range}")
+    BotLogger.debug(f"location : {location}")
 
     return "Find Activity()"

@@ -33,7 +33,7 @@ class AudioConvert :
         cmd_output += popen(f"ffmpeg -y -i {input_path} {output_path} 2>&1").read()
         cmd_output += "----------------------------------------------------------"
 
-        BotLogger.log_debug(cmd_output)
+        BotLogger.debug(cmd_output)
 
         # return full path of output audio file
         return Path(expanduser(output_path))
@@ -59,7 +59,7 @@ class AudioConvert :
         cmd_output += popen(f"ffmpeg -y -i {input_path} {output_path} 2>&1").read()
         cmd_output += "----------------------------------------------------------"
 
-        BotLogger.log_debug(cmd_output)
+        BotLogger.debug(cmd_output)
 
         # return full path of output audio file
         return Path(expanduser(output_path))

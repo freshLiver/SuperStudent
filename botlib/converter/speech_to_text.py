@@ -31,17 +31,17 @@ class SpeechToText :
             text = recognizer.Recognizer().recognize_google(audio, language = 'zh-tw')
 
             # return speech audio content text
-            BotLogger.log_info(f"Chinese Wav {wav_audio_path.__str__()} To CHT Done.")
+            BotLogger.info(f"Chinese Wav {wav_audio_path.__str__()} To CHT Done.")
             return text
 
         # input file not found
         except FileNotFoundError :
-            BotLogger.log_exception(f"STT Error, This File Not Found : {wav_audio_path.__str__()}")
+            BotLogger.exception(f"STT Error, This File Not Found : {wav_audio_path.__str__()}")
             return None
 
         # speech is unintelligible
         except LookupError :
-            BotLogger.log_exception(f"STT LookupError, Unintelligible Wav File : {wav_audio_path}.")
+            BotLogger.exception(f"STT LookupError, Unintelligible Wav File : {wav_audio_path}.")
             return None
 
 

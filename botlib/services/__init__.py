@@ -41,7 +41,7 @@ def service_matching( analyzer: 'SemanticAnalyzer' ) -> str :
 
     # choose target service with analyzer.target_service
     if analyzer.target_service == Services.UNKNOWN :
-        BotLogger.log_info("Unknown Request")
+        BotLogger.info("Unknown Request")
         return "非常抱歉，我聽不懂您的需求"
 
 
@@ -51,7 +51,7 @@ def service_matching( analyzer: 'SemanticAnalyzer' ) -> str :
         keywords = analyzer.service_info
         available_media = __extract_media(analyzer.service_info['ProperNouns'])
 
-        BotLogger.log_info("News Request")
+        BotLogger.info("News Request")
         return news.find_news(time_range, keywords, available_media)
 
 
@@ -63,8 +63,8 @@ def service_matching( analyzer: 'SemanticAnalyzer' ) -> str :
         location = analyzer.locations
 
         # TODO : find activity or delete activity
-        BotLogger.log_info("Activity Request")
+        BotLogger.info("Activity Request")
         return activity.find_activity(people, events, time_range, location)
 
     else :
-        BotLogger.log_critical("Service Matching Error. Should Not Be Here.")
+        BotLogger.critical("Service Matching Error. Should Not Be Here.")
