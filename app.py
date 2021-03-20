@@ -68,11 +68,11 @@ def callback() :
                 # stt error, send response audio message
                 if speech_text is None :
                     LineApi.make_audio_message_and_send(channel_token, reply_token, userid, response_text)
+                    BotLogger.log_info("Speech Text Is None.")
                     continue
 
-                # parse content and get response
-                if speech_text is not None :
-                    # parse user's speech content
+                # parse user's speech content and get response
+                else :
                     analyzer = SemanticAnalyzer(speech_text)
                     analyzer.parse_content()
 
