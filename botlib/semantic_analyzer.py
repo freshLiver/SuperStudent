@@ -60,7 +60,7 @@ class SemanticAnalyzer :
             # determine service
             if "新聞" in objects :
                 self.target_service = Services.NEWS
-            elif self.events is not [] :
+            elif self.events != [] :
                 self.target_service = Services.ACTIVITY
             else :
                 self.target_service = Services.UNKNOWN
