@@ -1,28 +1,37 @@
 # project libs
+import datetime
+
 from botlib.api.labapi import LabApi
 from botlib.botlogger import BotLogger
 from botlib.services import Services
 
 
+
 class SemanticAnalyzer :
     """
-
+    Semantic Analyze Input Speech Text
+    This Class Try To Find Out These Info With NER:
+    1. Target Service
+    2. pnList, Events, Datetime Range, Locations
     """
-    
-    
+
+
     # ------------------------------------------------------------------------------------------------------------
-    
+
     def __init__( self, speech_text: str ) :
         # text will be parsed
         self.speech_text = speech_text
-        
+
         # info dict for target service
-        self.service_info = { }
-        
+        self.pn_list = []
+        self.events = []
+        self.time_range = SemanticAnalyzer.__parse_time_range()
+        self.locations = []
+
         # result types
         self.target_service = Services.UNKNOWN
-    
-    
+
+
     def parse_content( self ) -> None :
         """
         do NER on input speech text vis Lab API
@@ -30,34 +39,51 @@ class SemanticAnalyzer :
         
         :return: None
         """
-        
+
         # parse speech text with NER
         ner_dict = LabApi.lab_ner_api(self.speech_text)
-        
+        BotLogger.log_debug(f"{{{self.speech_text}:{ner_dict}}}")
+
         # ner get nothing
         if ner_dict is None :
             BotLogger.log_info("NER Error.")
-        
+
         # extract info from ner result (if result not None)
         else :
+            # TODO : MUST IMPROVE THIS
             objects = ner_dict['objList']
-            proper_nouns = ner_dict['pnList']
-            events = ner_dict['fullEventList']
-            datetime = ner_dict['tList']
-            locations = ner_dict['locList']
-            
+            self.pn_list += list(ner_dict['pnList'])
+            self.events += list(ner_dict['fullEventList'])
+            self.time_range = SemanticAnalyzer.__parse_time_range(ner_dict['tList'])
+            self.locations += list(ner_dict['locList'])
+
             # determine service
             if "新聞" in objects :
                 self.target_service = Services.NEWS
-            elif events is not [] :
+            elif self.events is not [] :
                 self.target_service = Services.ACTIVITY
             else :
                 self.target_service = Services.UNKNOWN
-            
-            # add service info
-            self.service_info['ProperNouns'] = proper_nouns
-            self.service_info['Events'] = events
-            self.service_info['Datetime'] = datetime
-            self.service_info['Locations'] = locations
-            
+
             BotLogger.log_info("Parsing Speech Text Done.")
+
+
+    @staticmethod
+    def __parse_time_range( time_list = None ) -> (datetime, datetime) :
+        """
+        Parse Date Time Description List into Datetime Range (begin, finish) 
+        
+        :param time_list: Date Time Description List from NER
+        :return: Datetime Range (begin, finish), default value is today's datetime range
+        """
+
+        # get today datetime range
+        today_begin = datetime.datetime.combine(datetime.date.today(), datetime.time())
+        today_finish = today_begin + datetime.timedelta(seconds = 86399)
+
+        # TODO combine all datetime info to str
+        if time_list is not None :
+            pass
+
+        # default datetime range is today
+        return today_begin, today_finish

@@ -2,7 +2,8 @@ from enum import Enum
 
 # project libs
 from botlib.botlogger import BotLogger
-from botlib.services import news, database
+from botlib.services import news, activity
+
 
 
 class Services(Enum) :
@@ -13,12 +14,8 @@ class Services(Enum) :
 
 # ------------------------------------------------------------------------------------------------------------
 
-def __parse_datetime( datetime: list ) -> str or None :
-    # TODO combine all datetime info to str
-    return ""
 
-
-def __choose_media( proper_nouns: list ) -> news.AvailableMedia :
+def __extract_media( proper_nouns: list ) -> news.AvailableMedia :
     """
     Find Media From pnList From NER Result
     
@@ -30,10 +27,11 @@ def __choose_media( proper_nouns: list ) -> news.AvailableMedia :
     if "中時" in proper_nouns :
         return news.AvailableMedia.CHINATIME
 
+    # default NCKU news
     return news.AvailableMedia.NCKU
 
 
-def service_matching( analyzer: 'SemanticAnalyer' ) -> str :
+def service_matching( analyzer: 'SemanticAnalyzer' ) -> str :
     """
     Choose Service Via Semantic Analyzed Result Info
     
@@ -46,19 +44,27 @@ def service_matching( analyzer: 'SemanticAnalyer' ) -> str :
         BotLogger.log_info("Unknown Request")
         return "非常抱歉，我聽不懂您的需求"
 
-    elif analyzer.target_service == Services.NEWS :
 
-        # convert raw ner info into news service info
-        datetime = __parse_datetime(analyzer.service_info['Datetime'])
+    elif analyzer.target_service == Services.NEWS :
+        # convert raw ner info into news service param format
+        time_range = analyzer.time_range
         keywords = analyzer.service_info
-        media = __choose_media(analyzer.service_info['ProperNouns'])
+        available_media = __extract_media(analyzer.service_info['ProperNouns'])
 
         BotLogger.log_info("News Request")
-        return news.find_news(datetime, keywords, media)
+        return news.find_news(time_range, keywords, available_media)
+
 
     elif analyzer.target_service == Services.ACTIVITY :
+        # convert raw ner info into activity param format
+        people = analyzer.pn_list
+        events = analyzer.events
+        time_range = analyzer.time_range
+        location = analyzer.locations
 
+        # TODO : find activity or delete activity
         BotLogger.log_info("Activity Request")
+        return activity.find_activity(people, events, time_range, location)
 
     else :
         BotLogger.log_critical("Service Matching Error. Should Not Be Here.")
