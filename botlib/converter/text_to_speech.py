@@ -24,7 +24,7 @@ class TextToSpeech :
     def cht_to_chinese( userid: str, cht_text: str ) -> Path :
         try :
             # Determine output audio path
-            output_path = BotConfig.file_path_from(BotConfig.get_audio_output_dir(), userid, "")
+            output_path = BotConfig.file_path_from(BotConfig.get_audio_output_dir(), userid, ".wav")
 
             # Convert Cht Text to Chinese Speech
             gtts.gTTS(cht_text, lang = 'zh').save(output_path.__str__())

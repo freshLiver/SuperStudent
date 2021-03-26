@@ -55,9 +55,9 @@ class AudioConvert :
         output_path = input_path + ".m4a"
 
         # run ffmpeg to convert audio format
-        cmd_output = "----------------------------------------------------------"
+        cmd_output = "----------------------------------------------------------\n"
         cmd_output += popen(f"ffmpeg -y -i {input_path} {output_path} 2>&1").read()
-        cmd_output += "----------------------------------------------------------"
+        cmd_output += "----------------------------------------------------------\n"
 
         BotLogger.debug(cmd_output)
 
