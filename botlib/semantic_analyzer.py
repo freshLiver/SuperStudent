@@ -23,6 +23,7 @@ class SemanticAnalyzer :
         self.speech_text = speech_text
 
         # info dict for target service
+        self.obj_list = []
         self.pn_list = []
         self.events = []
         self.time_range = SemanticAnalyzer.__parse_time_range()
@@ -51,16 +52,16 @@ class SemanticAnalyzer :
         # extract info from ner result (if result not None)
         else :
             # TODO : MUST IMPROVE THIS
-            objects = ner_dict['objList']
+            self.obj_list = ner_dict['objList']
             self.pn_list += list(ner_dict['pnList'])
             self.events += list(ner_dict['fullEventList'])
             self.time_range = SemanticAnalyzer.__parse_time_range(ner_dict['tList'])
             self.locations += list(ner_dict['locList'])
 
             # determine service
-            if "新聞" in objects :
+            if "新聞" in self.obj_list :
                 self.target_service = Services.NEWS
-            elif self.events != [] :
+            elif self.events != [] or "活動" in self.obj_list :
                 self.target_service = Services.ACTIVITY
             else :
                 self.target_service = Services.UNKNOWN

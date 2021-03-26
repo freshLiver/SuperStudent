@@ -48,8 +48,8 @@ def service_matching( analyzer: 'SemanticAnalyzer' ) -> str :
     elif analyzer.target_service == Services.NEWS :
         # convert raw ner info into news service param format
         time_range = analyzer.time_range
-        keywords = analyzer.service_info
-        available_media = __extract_media(analyzer.service_info['ProperNouns'])
+        keywords = analyzer.obj_list
+        available_media = __extract_media(analyzer.pn_list)
 
         BotLogger.info("News Request")
         return news.find_news(time_range, keywords, available_media)
@@ -62,7 +62,7 @@ def service_matching( analyzer: 'SemanticAnalyzer' ) -> str :
         time_range = analyzer.time_range
         location = analyzer.locations
 
-        # TODO : find activity or delete activity
+        # TODO : find activity or create activity
         BotLogger.info("Activity Request")
         return activity.find_activity(people, events, time_range, location)
 
