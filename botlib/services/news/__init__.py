@@ -25,4 +25,4 @@ def find_news( time_range: (datetime, datetime), keywords: list, media: Availabl
     """
 
     # TODO call target news crawler and get result
-    return "Find News()"
+    return "查詢新聞"
