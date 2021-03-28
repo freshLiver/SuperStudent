@@ -9,7 +9,8 @@ from botlib.services import news, activity
 class Services(Enum) :
     UNKNOWN = -1
     NEWS = 0
-    ACTIVITY = 1
+    CREATE_ACTIVITY = 1
+    SEARCH_ACTIVITY = 2
 
 
 # ------------------------------------------------------------------------------------------------------------
@@ -55,16 +56,19 @@ def service_matching( analyzer: 'SemanticAnalyzer' ) -> str :
         return news.find_news(time_range, keywords, available_media)
 
 
-    elif analyzer.target_service == Services.ACTIVITY :
+    elif analyzer.target_service is Services.SEARCH_ACTIVITY or Services.CREATE_ACTIVITY :
         # convert raw ner info into activity param format
         people = analyzer.pn_list
         events = analyzer.events
         time_range = analyzer.time_range
         location = analyzer.locations
 
-        # TODO : find activity or create activity
+        # TODO : search or create activity
         BotLogger.info("Activity Request")
-        return activity.find_activity(people, events, time_range, location)
+        if analyzer.target_service == Services.SEARCH_ACTIVITY :
+            return activity.find_activity(people, events, time_range, location)
+        return activity.create_activity(people, events, time_range, location)
+
 
     else :
         BotLogger.critical("Service Matching Error. Should Not Be Here.")

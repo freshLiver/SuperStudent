@@ -61,8 +61,23 @@ class SemanticAnalyzer :
             # determine service
             if "新聞" in self.obj_list :
                 self.target_service = Services.NEWS
+
             elif self.events != [] or "活動" in self.obj_list :
-                self.target_service = Services.ACTIVITY
+
+                # simply choose activity service type
+                for search_kw in ["什麼", "想知道"] :
+                    if search_kw in self.speech_text :
+                        self.target_service = Services.SEARCH_ACTIVITY
+
+                for create_kw in ["有", "舉行", "舉辦"] :
+                    if create_kw in self.speech_text :
+                        self.target_service = Services.CREATE_ACTIVITY
+
+                # default activity service is SEARCH
+                if self.target_service == Services.UNKNOWN :
+                    self.target_service = Services.SEARCH_ACTIVITY
+
+            # unknown request
             else :
                 self.target_service = Services.UNKNOWN
 
