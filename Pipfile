@@ -10,6 +10,7 @@ pydub = "*"
 speechrecognition = "*"
 env-file = "*"
 gtts = "*"
+python-dateutil = "*"
 
 [dev-packages]
 
