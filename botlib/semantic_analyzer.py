@@ -3,6 +3,7 @@ import datetime
 
 from botlib.api.labapi import LabApi
 from botlib.botlogger import BotLogger
+from botlib.converter.datetime_converter import DatetimeConverter
 from botlib.services import Services
 
 
@@ -21,6 +22,7 @@ class SemanticAnalyzer :
     def __init__( self, speech_text: str ) :
         # text will be parsed
         self.speech_text = speech_text
+        self.abs_speech_text = ""
 
         # info dict for target service
         self.obj_list = []
@@ -42,8 +44,10 @@ class SemanticAnalyzer :
         """
 
         # parse speech text with NER
-        ner_dict = LabApi.lab_ner_api(self.speech_text)
-        BotLogger.debug(f"{{{self.speech_text}:{ner_dict}}}")
+        self.abs_speech_text = DatetimeConverter.get_abs_datetime_sentence(self.speech_text)
+
+        ner_dict = LabApi.lab_ner_api(self.abs_speech_text)
+        BotLogger.debug(f"{{{self.abs_speech_text}:{ner_dict}}}")
 
         # ner get nothing
         if ner_dict is None :
