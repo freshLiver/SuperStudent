@@ -44,7 +44,7 @@ class SemanticAnalyzer :
         """
 
         # parse speech text with NER
-        self.abs_speech_text = DatetimeConverter.get_abs_datetime_sentence(self.speech_text)
+        self.abs_speech_text = DatetimeConverter.parse_datetime(self.speech_text)
 
         ner_dict = LabApi.lab_ner_api(self.abs_speech_text)
         BotLogger.debug(f"{{{self.abs_speech_text}:{ner_dict}}}")

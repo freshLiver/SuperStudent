@@ -39,7 +39,8 @@ class DatetimeConverter :
     __CHT_DATETIME_RULE = re.compile(__CHT_DATETIME_FMT)
 
     __ARABIC_NUMBER_RULE = re.compile("\d+")
-    __ABSOLUTE_DATETIME_FMT = "%Y年%m月%d日%H點%M分"
+    __ABSOLUTE_DATE_FMT = "%Y年%m月%d日"
+    __ABSOLUTE_DATETIME_FMT = f"{__ABSOLUTE_DATE_FMT}%H點%M分"
 
     __ARABIC_YEAR_RULE = re.compile(f"\d+{__YEAR_UNIT_FMT}")
     __ARABIC_MONTH_RULE = re.compile(f"\d+{__MONTH_UNIT_FMT}")
@@ -62,7 +63,72 @@ class DatetimeConverter :
     # ----------------------------------------------------------------------------------
 
     @staticmethod
-    def to_simplified_cht_number( cht_number_text: str ) -> str :
+    def parse_common_date_words( cht_sentence: str ) -> str :
+
+        now = datetime.datetime.now()
+
+        # year
+        year_rule = re.compile("[今明後]年")
+        year_matches = year_rule.finditer(cht_sentence)
+        for match in year_matches :
+            year_text = match.group()
+            year_shift = 0
+            if "明" in year_text :
+                year_shift = 1
+            elif "後" in year_text :
+                year_shift = 2
+            year_text = str((now + relativedelta(years = year_shift)).year)
+            cht_sentence = cht_sentence.replace(match.group(), f"{year_text}年")
+
+        # month
+        month_rule = re.compile("(這|下+)個?月")
+        month_matches = month_rule.finditer(cht_sentence)
+        for match in month_matches :
+            month_text = match.group()
+            month_shift = 0
+            if "下" in month_text :
+                for char in month_text :
+                    month_shift += 1 if char == "下" else 0
+            month_text = str((now + relativedelta(months = month_shift)).month)
+            cht_sentence = cht_sentence.replace(match.group(), f"{month_text}月")
+
+        # week
+        week_rule = re.compile("(這|下+)個?(禮拜|星期|周|週)")
+        week_matches = week_rule.finditer(cht_sentence)
+        for match in week_matches :
+            week_text = match.group()
+            week_shift = 0
+            if "下" in week_text :
+                for char in week_text :
+                    week_shift += 1 if char == "下" else 0
+
+            # get start and end day of target week
+            start_date = now + relativedelta(weeks = week_shift, days = -1 * now.weekday())
+            end_date = start_date + relativedelta(days = 6)
+
+            # replace origin match text by "start 到 end"
+            date_fmt = DatetimeConverter.__ABSOLUTE_DATE_FMT
+            week_text = f"{start_date.strftime(date_fmt)} 到 {end_date.strftime(date_fmt)}"
+            cht_sentence = cht_sentence.replace(match.group(), week_text)
+
+        # day
+        day_rule = re.compile("[今明後][天日]")
+        day_matches = day_rule.finditer(cht_sentence)
+        for match in day_matches :
+            day_text = match.group()
+            day_shift = 0
+            if "明" in day_text :
+                day_shift = 1
+            elif "後" in day_text :
+                day_shift = 2
+            day_text = str((now + relativedelta(days = day_shift)).day)
+            cht_sentence = cht_sentence.replace(match.group(), f"{day_text}日")
+
+        return cht_sentence
+
+
+    @staticmethod
+    def simplify_cht_numeral_representations( cht_number_sentence: str ) -> str :
         """
         simplify cht numbers in raw_sentence for easier parsing
 
@@ -71,11 +137,11 @@ class DatetimeConverter :
         2. 十二 -> 一二
         3. 二十三 -> 二三
 
-        :param cht_number_text: target text that will be simplify
-        :return: simplified raw_text
+        :param cht_number_sentence: target text that will be simplify
+        :return: simplified cht_number_sentence
         """
 
-        match = re.search("[一二三四五六七八九]十[一二三四五六七八九]?", cht_number_text)
+        match = re.search("[一二三四五六七八九]十[一二三四五六七八九]?", cht_number_sentence)
         if match is not None :
             text = match.group()
             if text[-1] == "十" :
@@ -83,31 +149,31 @@ class DatetimeConverter :
             else :
                 value = text.replace("十", "")
 
-            cht_number_text = cht_number_text.replace(text, value)
+            cht_number_sentence = cht_number_sentence.replace(text, value)
 
-        match = re.search("十[一二三四五六七八九]", cht_number_text)
+        match = re.search("十[一二三四五六七八九]", cht_number_sentence)
         if match is not None :
             value = match.group().replace("十", "一")
-            cht_number_text = cht_number_text.replace(match.group(), value)
+            cht_number_sentence = cht_number_sentence.replace(match.group(), value)
 
-        return cht_number_text
+        return cht_number_sentence
 
 
     @staticmethod
-    def to_arabic_numerals( simplified_text: str ) -> str :
+    def cht_to_arabic_numerals( simplified_cht_sentence: str ) -> str :
         """
         replace all cht number in text with corresponding arabic numerals
 
-        :param simplified_text: simplified text with cht numbers
+        :param simplified_cht_sentence: simplified text with cht numbers
         :return: result text
         """
         for char in DatetimeConverter.__NUMBER_CONVERT_DICT :
-            simplified_text = simplified_text.replace(char, DatetimeConverter.__NUMBER_CONVERT_DICT[char])
-        return simplified_text
+            simplified_cht_sentence = simplified_cht_sentence.replace(char, DatetimeConverter.__NUMBER_CONVERT_DICT[char])
+        return simplified_cht_sentence
 
 
     @staticmethod
-    def get_abs_future_datetime( relative_arabic_datetime: str ) -> str :
+    def get_absolute_datetime( relative_arabic_datetime: str ) -> str :
         """
         convert relative *future* datetime to absolute datetime base on current date and time
         
@@ -168,39 +234,42 @@ class DatetimeConverter :
 
 
     @staticmethod
-    def get_abs_datetime_sentence( un_simplified_cht_datetime: str ) -> str :
+    def parse_datetime( cht_sentence: str ) -> str :
         """
         Convert *un-simplified CHT datetime text* into datetime text with arabic numeral value   
 
-        :param un_simplified_cht_datetime: *un-simplified* CHT datetime text
+        :param cht_sentence: any cht sentence 
         :return: datetime text with arabic numeral value
         """
 
+        # convert "今天", "明天" and similar datetime words to abs time
+        cht_sentence = DatetimeConverter.parse_common_date_words(cht_sentence)
+
         # extract cht datetime part
-        match_iter = DatetimeConverter.__CHT_DATETIME_RULE.finditer(un_simplified_cht_datetime)
+        match_iter = DatetimeConverter.__CHT_DATETIME_RULE.finditer(cht_sentence)
         non_empty_matches = { }
         for matches in match_iter :
             match_text = matches.group()
             if match_text != '' :
                 non_empty_matches[match_text] = ""
 
-        # if no match, return origin sentence
+        # if no match cht datetime sentence, return origin sentence
         if non_empty_matches == { } :
-            return un_simplified_cht_datetime
+            return cht_sentence
 
         # simplify cht datetime parts and convert to datetime with arabic numeral value
         for match in non_empty_matches :
-            tmp = DatetimeConverter.to_simplified_cht_number(match)
-            tmp = DatetimeConverter.to_arabic_numerals(tmp)
+            tmp = DatetimeConverter.simplify_cht_numeral_representations(match)
+            tmp = DatetimeConverter.cht_to_arabic_numerals(tmp)
             non_empty_matches[match] = tmp.replace("又", "").replace("個", "")
         print(non_empty_matches)
 
-        # convert future datetime to abs datetime
+        # convert datetime description to abs datetime
         for match in (future_matches for future_matches in non_empty_matches if "後" in future_matches) :
-            non_empty_matches[match] = DatetimeConverter.get_abs_future_datetime(non_empty_matches[match])
+            non_empty_matches[match] = DatetimeConverter.get_absolute_datetime(non_empty_matches[match])
 
         # replace origin datetime strings with new string
-        result = un_simplified_cht_datetime
+        result = cht_sentence
         for match in non_empty_matches :
             result = result.replace(match, f" {non_empty_matches[match]} ")
 
@@ -211,5 +280,5 @@ if __name__ == '__main__' :
 
     # print(res)
     # res = DatetimeConverter.abs_future_time(res)
-    res = DatetimeConverter.get_abs_datetime_sentence("光復操場一年又二週又二十一小時之後有活動會在五點二十五分舉行")
+    res = DatetimeConverter.parse_common_date_words("下禮拜有活動")
     print(res)
