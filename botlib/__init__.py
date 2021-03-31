@@ -1,7 +1,8 @@
-import env_file
+import configparser
 from os import system
 from os.path import expanduser, join
 from pathlib import Path
+
 
 
 class BotConfig :
@@ -23,22 +24,20 @@ class BotConfig :
     system(f"mkdir {__AUDIO_INPUT_TMP}")
     system(f"mkdir {__AUDIO_OUTPUT_TMP}")
 
-    # abs path of .env file
-    __ENV_FILE_PATH = join(__PROJECT_ROOT, ".env")
-
-    # load .env file of this project
-    __ENV_FILE = env_file.get(__ENV_FILE_PATH)
+    # abs path of config.ini file
+    __CONFIG_FILE = configparser.ConfigParser()
+    __CONFIG_FILE.read(join(__PROJECT_ROOT, "config.ini"))
 
     # LINE BOT Channel Token & Secret
-    __LINE_CHANNEL_TOKEN = str(__ENV_FILE.get("line_channel_access_token"))
-    __LINE_CHANNEL_SECRET = str(__ENV_FILE.get("line_channel_secret"))
+    __LINE_CHANNEL_TOKEN = str(__CONFIG_FILE["LINEBOT"]["line_channel_access_token"])
+    __LINE_CHANNEL_SECRET = str(__CONFIG_FILE["LINEBOT"]["line_channel_secret"])
 
     # flask port
     __PORT = int(7777)
 
     # lab api tokens
-    __LAB_NER_TOKEN = str(__ENV_FILE.get("lab_ner_token"))
-    __LAB_C2T_TOKEN = str(__ENV_FILE.get("lab_c2t_token"))
+    __LAB_NER_TOKEN = str(__CONFIG_FILE["LABAPI"]["lab_ner_token"])
+    __LAB_C2T_TOKEN = str(__CONFIG_FILE["LABAPI"]["lab_c2t_token"])
 
     # lab api hosts and ports
     __LAB_NER_HOST_PORT = ("140.116.245.151", 9921)
@@ -163,9 +162,9 @@ class BotConfig :
         :param postfix: filename postfix
         :return: Path obj of this file
         """
-    
+
         # get file path
         file_path = join(target_dir, f"{filename}{postfix}")
-    
+
         # return Path obj
         return Path(expanduser(file_path))
