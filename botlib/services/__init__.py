@@ -1,5 +1,5 @@
+import re
 from enum import Enum
-
 # project libs
 from botlib.botlogger import BotLogger
 from botlib.services import news, activity
@@ -7,28 +7,28 @@ from botlib.services import news, activity
 
 
 class Services(Enum) :
-    UNKNOWN = -1
-    NEWS = 0
-    CREATE_ACTIVITY = 1
-    SEARCH_ACTIVITY = 2
+    UNKNOWN = "無法辨識服務"
+    SEARCH_NEWS = "查詢新聞"
+    CREATE_ACTIVITY = "新增活動"
+    SEARCH_ACTIVITY = "查詢活動"
 
 
 # ------------------------------------------------------------------------------------------------------------
 
 
-def __extract_media( proper_nouns: list ) -> news.AvailableMedia :
+def __extract_media( cht_text: str ) -> news.AvailableMedia :
     """
     Find Media From pnList From NER Result
     
-    :param proper_nouns: pnList from ner info
+    :param cht_text: pnList from ner info
     :return: news.AvailableMedia (default media is news.AvailableMedia.NCKU)
     """
 
     # TODO find available media from pn List
-    if "中時" in proper_nouns :
+    if re.search("(中國時報|中時(電子報)?)", cht_text) :
         return news.AvailableMedia.CHINATIME
 
-    # default NCKU news
+    # default news media is NCKU news
     return news.AvailableMedia.NCKU
 
 
@@ -46,11 +46,11 @@ def service_matching( analyzer: 'SemanticAnalyzer' ) -> str :
         return "非常抱歉，我聽不懂您的需求"
 
 
-    elif analyzer.target_service == Services.NEWS :
+    elif analyzer.target_service == Services.SEARCH_NEWS :
         # convert raw ner info into news service param format
         time_range = analyzer.time_range
         keywords = analyzer.obj_list
-        available_media = __extract_media(analyzer.pn_list)
+        available_media = __extract_media(analyzer.parsed_content)
 
         BotLogger.info("News Request")
         return news.find_news(time_range, keywords, available_media)

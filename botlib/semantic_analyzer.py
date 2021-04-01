@@ -22,7 +22,7 @@ class SemanticAnalyzer :
     def __init__( self, speech_text: str ) :
         # text will be parsed
         self.speech_text = speech_text
-        self.abs_speech_text = ""
+        self.parsed_content = ""
 
         # info dict for target service
         self.obj_list = []
@@ -44,10 +44,10 @@ class SemanticAnalyzer :
         """
 
         # parse speech text with NER
-        self.abs_speech_text = DatetimeConverter.parse_datetime(self.speech_text)
+        self.parsed_content = DatetimeConverter.parse_datetime(self.speech_text)
 
-        ner_dict = LabApi.lab_ner_api(self.abs_speech_text)
-        BotLogger.debug(f"{{{self.abs_speech_text}:{ner_dict}}}")
+        ner_dict = LabApi.lab_ner_api(self.parsed_content)
+        BotLogger.debug(f"{{{self.parsed_content}:{ner_dict}}}")
 
         # ner get nothing
         if ner_dict is None :
@@ -64,20 +64,21 @@ class SemanticAnalyzer :
 
             # determine service
             if "新聞" in self.obj_list :
-                self.target_service = Services.NEWS
+                self.target_service = Services.SEARCH_NEWS
 
             elif self.events != [] or "活動" in self.obj_list :
 
                 # simply choose activity service type
-                for search_kw in ["什麼", "想知道"] :
+                for search_kw in ["什麼", "想知道", "哪些"] :
                     if search_kw in self.speech_text :
                         self.target_service = Services.SEARCH_ACTIVITY
 
-                for create_kw in ["有", "舉行", "舉辦"] :
-                    if create_kw in self.speech_text :
-                        self.target_service = Services.CREATE_ACTIVITY
+                if self.target_service == Services.UNKNOWN :
+                    for create_kw in ["有", "舉行", "舉辦"] :
+                        if create_kw in self.speech_text :
+                            self.target_service = Services.CREATE_ACTIVITY
 
-                # default activity service is SEARCH
+                # TEST default activity service is SEARCH
                 if self.target_service == Services.UNKNOWN :
                     self.target_service = Services.SEARCH_ACTIVITY
 
