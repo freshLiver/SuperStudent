@@ -23,7 +23,7 @@ class AvailableMedia(Enum) :
 # ------------------------------------------------------------------------------------------------------------
 
 
-def find_news( time_range: (datetime, datetime), keywords: list, media: AvailableMedia ) -> str :
+def search_news( time_range: (datetime, datetime), keywords: list, media: AvailableMedia ) -> str :
     """
     
     :param time_range:

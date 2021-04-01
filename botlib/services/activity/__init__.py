@@ -10,7 +10,7 @@ def create_activity( content: str ) -> str :
     return "新增活動"
 
 
-def find_activity( people: list, events: list, time_range: (datetime, datetime), location: list ) -> str :
+def search_activity( people: list, events: list, time_range: (datetime, datetime), location: list ) -> str :
     # TODO call find activity function
 
     BotLogger.debug(f"people : {people}")

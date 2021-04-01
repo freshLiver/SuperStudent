@@ -1,5 +1,12 @@
+# @formatter:off, this is for avoiding circular type import
+from typing import TYPE_CHECKING
+if TYPE_CHECKING :
+    from botlib.semantic_analyzer import SemanticAnalyzer
+# @formatter:on
+
 import re
 from enum import Enum
+
 # project libs
 from botlib.botlogger import BotLogger
 from botlib.services import news, activity
@@ -43,7 +50,7 @@ def extract_media( cht_text: str ) -> news.AvailableMedia :
 # ------------------------------------------------------------------------------------------------------------
 
 
-def service_matching( analyzer: 'SemanticAnalyzer' ) -> str :
+def match_service( analyzer: 'SemanticAnalyzer' ) -> str :
     """
     Choose Service Via Semantic Analyzed Result Info
     
@@ -52,34 +59,26 @@ def service_matching( analyzer: 'SemanticAnalyzer' ) -> str :
     """
 
     # choose target service with analyzer.target_service
-    if analyzer.target_service == Services.UNKNOWN :
+    if analyzer.service == Services.UNKNOWN :
         BotLogger.info("Unknown Request")
         return "非常抱歉，我聽不懂您的需求"
 
+    keywords = analyzer.obj_list
+    people = analyzer.pn_list
+    events = analyzer.event_list
 
-    elif analyzer.target_service == Services.SEARCH_NEWS :
-        # convert raw ner info into news service param format
-        time_range = analyzer.time_range
-        keywords = analyzer.obj_list
-        available_media = extract_media(analyzer.parsed_content)
+    if analyzer.service == Services.SEARCH_NEWS :
+        BotLogger.info("Search News Request")
+        media = extract_media(analyzer.parsed_content)
+        return news.search_news(analyzer.time, keywords, media)
 
-        BotLogger.info("News Request")
-        return news.find_news(time_range, keywords, available_media)
+    elif analyzer.service == Services.SEARCH_ACTIVITY :
+        BotLogger.info("Search Activity Request")
+        return activity.search_activity(people, events, analyzer.time, analyzer.loc_list)
 
-
-    elif analyzer.target_service is Services.SEARCH_ACTIVITY or Services.CREATE_ACTIVITY :
-        # convert raw ner info into activity param format
-        people = analyzer.pn_list
-        events = analyzer.events
-        time_range = analyzer.time_range
-        location = analyzer.locations
-
-        # TODO : search or create activity
-        BotLogger.info("Activity Request")
-        if analyzer.target_service == Services.SEARCH_ACTIVITY :
-            return activity.find_activity(people, events, time_range, location)
+    elif analyzer.service == Services.CREATE_ACTIVITY :
+        BotLogger.info("Create Activity Request")
         return activity.create_activity(analyzer.parsed_content)
 
-
     else :
-        BotLogger.critical("Service Matching Error. Should Not Be Here.")
+        BotLogger.critical("Service Matching Error. Should Never Be Here.")

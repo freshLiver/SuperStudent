@@ -6,7 +6,7 @@ from botlib.api.lineapi import LineApi
 from botlib.botlogger import BotLogger
 from botlib.converter.audio_converter import AudioConvert
 from botlib.converter.speech_to_text import SpeechToText
-from botlib.services import service_matching
+from botlib.services import match_service
 from botlib.semantic_analyzer import SemanticAnalyzer
 
 # flask libs
@@ -77,7 +77,7 @@ def callback() :
                     analyzer.parse_content()
 
                     # get response base on analyze result
-                    response_text = service_matching(analyzer = analyzer)
+                    response_text = match_service(analyzer = analyzer)
 
                 # send response (None for no response)
                 if response_text is not None :

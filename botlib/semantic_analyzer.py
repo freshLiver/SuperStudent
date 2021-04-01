@@ -51,12 +51,12 @@ class SemanticAnalyzer :
         # info dict for target service
         self.obj_list = []
         self.pn_list = []
-        self.events = []
-        self.time_range = SemanticAnalyzer.__parse_time_range()
-        self.locations = []
+        self.event_list = []
+        self.time = SemanticAnalyzer.__parse_time_range()
+        self.loc_list = []
 
         # result types
-        self.target_service = Services.UNKNOWN
+        self.service = Services.UNKNOWN
 
 
     def parse_content( self ) -> None :
@@ -82,32 +82,32 @@ class SemanticAnalyzer :
             # TODO : MUST IMPROVE THIS
             self.obj_list = ner_dict['objList']
             self.pn_list += list(ner_dict['pnList'])
-            self.events += list(ner_dict['fullEventList'])
-            self.time_range = SemanticAnalyzer.__parse_time_range(ner_dict['tList'])
-            self.locations += list(ner_dict['locList'])
+            self.event_list += list(ner_dict['fullEventList'])
+            self.time = SemanticAnalyzer.__parse_time_range(ner_dict['tList'])
+            self.loc_list += list(ner_dict['locList'])
 
             # determine service
             if "新聞" in self.obj_list :
-                self.target_service = Services.SEARCH_NEWS
+                self.service = Services.SEARCH_NEWS
 
-            elif self.events != [] or "活動" in self.obj_list :
+            elif self.event_list != [] or "活動" in self.obj_list :
 
                 # simply choose activity service type
                 for search_kw in ["什麼", "想知道", "哪些"] :
                     if search_kw in self.speech_text :
-                        self.target_service = Services.SEARCH_ACTIVITY
+                        self.service = Services.SEARCH_ACTIVITY
 
-                if self.target_service == Services.UNKNOWN :
+                if self.service == Services.UNKNOWN :
                     for create_kw in ["有", "舉行", "舉辦"] :
                         if create_kw in self.speech_text :
-                            self.target_service = Services.CREATE_ACTIVITY
+                            self.service = Services.CREATE_ACTIVITY
 
                 # TEST default activity service is SEARCH
-                if self.target_service == Services.UNKNOWN :
-                    self.target_service = Services.SEARCH_ACTIVITY
+                if self.service == Services.UNKNOWN :
+                    self.service = Services.SEARCH_ACTIVITY
 
             # unknown request
             else :
-                self.target_service = Services.UNKNOWN
+                self.service = Services.UNKNOWN
 
             BotLogger.info("Parsing Speech Text Done.")
