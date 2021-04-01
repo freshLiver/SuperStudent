@@ -8,7 +8,6 @@ line-bot-sdk = "*"
 flask = "*"
 pydub = "*"
 speechrecognition = "*"
-env-file = "*"
 gtts = "*"
 python-dateutil = "*"
 
