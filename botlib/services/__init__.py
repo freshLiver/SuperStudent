@@ -16,7 +16,7 @@ class Services(Enum) :
 # ------------------------------------------------------------------------------------------------------------
 
 
-def __extract_media( cht_text: str ) -> news.AvailableMedia :
+def extract_media( cht_text: str ) -> news.AvailableMedia :
     """
     Find Media From pnList From NER Result
     
@@ -25,11 +25,22 @@ def __extract_media( cht_text: str ) -> news.AvailableMedia :
     """
 
     # TODO find available media from pn List
+    if re.search("自由時報", cht_text) :
+        return news.AvailableMedia.LTN
     if re.search("(中國時報|中時(電子報)?)", cht_text) :
         return news.AvailableMedia.CHINATIME
+    if re.search("TVBS", cht_text) :
+        return news.AvailableMedia.TVBS
+    if re.search("ETTODAY(新聞雲)?", cht_text) :
+        return news.AvailableMedia.ETTODAY
+    if re.search("(UDN|聯合報)", cht_text) :
+        return news.AvailableMedia.UDN
 
     # default news media is NCKU news
     return news.AvailableMedia.NCKU
+
+
+# ------------------------------------------------------------------------------------------------------------
 
 
 def service_matching( analyzer: 'SemanticAnalyzer' ) -> str :
@@ -50,7 +61,7 @@ def service_matching( analyzer: 'SemanticAnalyzer' ) -> str :
         # convert raw ner info into news service param format
         time_range = analyzer.time_range
         keywords = analyzer.obj_list
-        available_media = __extract_media(analyzer.parsed_content)
+        available_media = extract_media(analyzer.parsed_content)
 
         BotLogger.info("News Request")
         return news.find_news(time_range, keywords, available_media)
@@ -67,7 +78,7 @@ def service_matching( analyzer: 'SemanticAnalyzer' ) -> str :
         BotLogger.info("Activity Request")
         if analyzer.target_service == Services.SEARCH_ACTIVITY :
             return activity.find_activity(people, events, time_range, location)
-        return activity.create_activity(people, events, time_range, location)
+        return activity.create_activity(analyzer.parsed_content)
 
 
     else :

@@ -19,6 +19,30 @@ class SemanticAnalyzer :
 
     # ------------------------------------------------------------------------------------------------------------
 
+    @staticmethod
+    def __parse_time_range( time_list = None ) -> (datetime, datetime) :
+        """
+        Parse Date Time Description List into Datetime Range (begin, finish)
+
+        :param time_list: Date Time Description List from NER
+        :return: Datetime Range (begin, finish), default value is today's datetime range
+        """
+
+        # get today datetime range
+        today_begin = datetime.datetime.combine(datetime.date.today(), datetime.time())
+        today_finish = today_begin + datetime.timedelta(seconds = 86399)
+
+        # TODO combine all datetime info to str
+        if time_list is not None :
+            pass
+
+        # default datetime range is today
+        return today_begin, today_finish
+
+
+    # ------------------------------------------------------------------------------------------------------------
+
+
     def __init__( self, speech_text: str ) :
         # text will be parsed
         self.speech_text = speech_text
@@ -87,24 +111,3 @@ class SemanticAnalyzer :
                 self.target_service = Services.UNKNOWN
 
             BotLogger.info("Parsing Speech Text Done.")
-
-
-    @staticmethod
-    def __parse_time_range( time_list = None ) -> (datetime, datetime) :
-        """
-        Parse Date Time Description List into Datetime Range (begin, finish) 
-        
-        :param time_list: Date Time Description List from NER
-        :return: Datetime Range (begin, finish), default value is today's datetime range
-        """
-
-        # get today datetime range
-        today_begin = datetime.datetime.combine(datetime.date.today(), datetime.time())
-        today_finish = today_begin + datetime.timedelta(seconds = 86399)
-
-        # TODO combine all datetime info to str
-        if time_list is not None :
-            pass
-
-        # default datetime range is today
-        return today_begin, today_finish

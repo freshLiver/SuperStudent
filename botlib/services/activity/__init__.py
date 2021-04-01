@@ -5,7 +5,7 @@ from botlib.botlogger import BotLogger
 
 
 
-def create_activity( people: list, events: list, time_range: (datetime, datetime), location: list ) -> str :
+def create_activity( content: str ) -> str :
     # TODO call create activity function
     return "新增活動"
 
