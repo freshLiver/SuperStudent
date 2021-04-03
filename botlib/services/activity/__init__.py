@@ -1,4 +1,7 @@
 import datetime
+import sqlite3
+
+from pathlib import Path
 
 # project lib
 from botlib.botlogger import BotLogger
@@ -7,6 +10,16 @@ from botlib.botlogger import BotLogger
 
 def create_activity( content: str ) -> str :
     # TODO call create activity function
+
+    this_dir = Path(__file__).parent
+    db = sqlite3.connect(Path.joinpath(this_dir, "test.db"))
+    cursor = db.cursor()
+
+    cmd = f"""INSERT OR IGNORE INTO activities VALUES("{content}")"""
+    cursor.execute(cmd)
+    db.commit()
+    db.close()
+
     return "新增活動"
 
 
