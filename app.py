@@ -56,7 +56,7 @@ def callback() :
                 # save audio message as a file
                 m4a_tmp_path = LineApi.save_audio_message_as_m4a(userid, event.message, line_bot_api)
 
-                # convert tmp m4a to wav for stt
+                # convert m4a(raw audio message) to wav for stt
                 wav_tmp_path = AudioConvert.m4a_to_wav(m4a_tmp_path)
 
                 # do STT

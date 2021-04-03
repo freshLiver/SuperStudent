@@ -66,6 +66,7 @@ class DatetimeConverter :
     def parse_common_date_words( cht_sentence: str ) -> str :
 
         now = datetime.datetime.now()
+        date_fmt = DatetimeConverter.__ABSOLUTE_DATE_FMT
 
         # year
         year_rule = re.compile("[今明後]年")
@@ -107,7 +108,6 @@ class DatetimeConverter :
             end_date = start_date + relativedelta(days = 6)
 
             # replace origin match text by "start 到 end"
-            date_fmt = DatetimeConverter.__ABSOLUTE_DATE_FMT
             week_text = f"{start_date.strftime(date_fmt)} 到 {end_date.strftime(date_fmt)}"
             cht_sentence = cht_sentence.replace(match.group(), week_text)
 
@@ -121,8 +121,10 @@ class DatetimeConverter :
                 day_shift = 1
             elif "後" in day_text :
                 day_shift = 2
-            day_text = str((now + relativedelta(days = day_shift)).day)
-            cht_sentence = cht_sentence.replace(match.group(), f"{day_text}日")
+            day_text = str((now + relativedelta(days = day_shift)).strftime(date_fmt))
+            cht_sentence = cht_sentence.replace(match.group(), f"{day_text}")
+
+        # TODO : 周X、週末、月底、月初
 
         return cht_sentence
 
@@ -262,7 +264,6 @@ class DatetimeConverter :
             tmp = DatetimeConverter.simplify_cht_numeral_representations(match)
             tmp = DatetimeConverter.cht_to_arabic_numerals(tmp)
             non_empty_matches[match] = tmp.replace("又", "").replace("個", "")
-        print(non_empty_matches)
 
         # convert datetime description to abs datetime
         for match in (future_matches for future_matches in non_empty_matches if "後" in future_matches) :

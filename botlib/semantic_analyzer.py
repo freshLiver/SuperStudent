@@ -71,43 +71,72 @@ class SemanticAnalyzer :
         self.parsed_content = DatetimeConverter.parse_datetime(self.speech_text)
 
         ner_dict = LabApi.lab_ner_api(self.parsed_content)
-        BotLogger.debug(f"{{{self.parsed_content}:{ner_dict}}}")
+        BotLogger.info(f"{{{self.parsed_content}:{ner_dict}}}")
 
         # ner get nothing
         if ner_dict is None :
             BotLogger.info("NER Error.")
+            return
 
-        # extract info from ner result (if result not None)
-        else :
-            # TODO : MUST IMPROVE THIS
-            self.obj_list = ner_dict['objList']
-            self.pn_list += list(ner_dict['pnList'])
-            self.event_list += list(ner_dict['fullEventList'])
-            self.time = SemanticAnalyzer.__parse_time_range(ner_dict['tList'])
-            self.loc_list += list(ner_dict['locList'])
+        # TODO (MUST IMPROVE THIS) : extract info from ner result (if result not None)
+        self.obj_list = ner_dict['objList']
+        self.pn_list += list(ner_dict['pnList'])
+        self.event_list += list(ner_dict['fullEventList'])
+        self.time = SemanticAnalyzer.__parse_time_range(ner_dict['tList'])
+        self.loc_list += list(ner_dict['locList'])
 
-            # determine service
-            if "新聞" in self.obj_list :
+        # determine service
+        if self.is_search_news() :
+            self.service = Services.SEARCH_NEWS
+
+        elif self.event_list != [] or "活動" in self.obj_list :
+            if self.is_search_activity() :
+                self.service = Services.SEARCH_ACTIVITY
+            elif self.is_create_activity() :
+                self.service = Services.CREATE_ACTIVITY
+            else :
                 self.service = Services.SEARCH_NEWS
 
-            elif self.event_list != [] or "活動" in self.obj_list :
+        else :
+            self.service = Services.UNKNOWN
+            BotLogger.info("Unknown Service")
 
-                # simply choose activity service type
-                for search_kw in ["什麼", "想知道", "哪些"] :
-                    if search_kw in self.speech_text :
-                        self.service = Services.SEARCH_ACTIVITY
+        BotLogger.info("Parsing Speech Text Done.")
 
-                if self.service == Services.UNKNOWN :
-                    for create_kw in ["有", "舉行", "舉辦"] :
-                        if create_kw in self.speech_text :
-                            self.service = Services.CREATE_ACTIVITY
 
-                # TEST default activity service is SEARCH
-                if self.service == Services.UNKNOWN :
-                    self.service = Services.SEARCH_ACTIVITY
+    def is_search_news( self ) -> bool :
+        """
+        user request a news searching service or not
 
-            # unknown request
-            else :
-                self.service = Services.UNKNOWN
+        :return: is a news searching request
+        """
+        if "新聞" in self.parsed_content :
+            BotLogger.info("Is Search News")
+            return True
+        return False
 
-            BotLogger.info("Parsing Speech Text Done.")
+
+    def is_search_activity( self ) -> bool :
+        """
+        user request a activity searching service or not
+
+        :return: is a activity searching request
+        """
+        for keyword in ["查詢", "什麼", "想知道", "哪些"] :
+            if keyword in self.parsed_content :
+                BotLogger.info("Is Search Activity")
+                return True
+        return False
+
+
+    def is_create_activity( self ) -> bool :
+        """
+        user request a activity creating service or not
+
+        :return: is a activity searching request
+        """
+        for keyword in ["有", "舉行", "舉辦"] :
+            if keyword in self.parsed_content :
+                BotLogger.info("Is Create Activity")
+                return True
+        return False
