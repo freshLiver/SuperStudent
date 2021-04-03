@@ -64,7 +64,7 @@ def match_service( analyzer: 'SemanticAnalyzer' ) -> str :
         return "非常抱歉，我聽不懂您的需求"
 
     keywords = analyzer.obj_list
-    people = analyzer.pn_list
+    proper_nouns = analyzer.pn_list
     events = analyzer.event_list
 
     if analyzer.service == Services.SEARCH_NEWS :
@@ -74,7 +74,7 @@ def match_service( analyzer: 'SemanticAnalyzer' ) -> str :
 
     elif analyzer.service == Services.SEARCH_ACTIVITY :
         BotLogger.info("Search Activity Request")
-        return activity.search_activity(people, events, analyzer.time, analyzer.loc_list)
+        return activity.search_activity(proper_nouns, events, analyzer.time, analyzer.loc_list)
 
     elif analyzer.service == Services.CREATE_ACTIVITY :
         BotLogger.info("Create Activity Request")
