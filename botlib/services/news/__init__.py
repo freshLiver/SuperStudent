@@ -5,7 +5,12 @@ import datetime
 from botlib import BotConfig
 from botlib.botlogger import BotLogger
 
-
+# import crawler
+import udn
+import chinatimes
+import ltn
+import tvbs
+import ettoday
 
 class AvailableMedia(Enum) :
     """
@@ -31,11 +36,20 @@ def search_news( time_range: (datetime, datetime), keywords: list, media: Availa
     :param media:
     :return:
     """
-
+    if media == AvailableMedia.UDN:
+        result = udn.parse(keywords,time_range)
+    elif media == AvailableMedia.LTN:
+        result = ltn.parse(keywords,time_range)
+    elif media == AvailableMedia.CHINATIME:
+        result = chinatimes.parse(keywords, time_range)
+    elif media == AvailableMedia.ETTODAY:
+        result = ettoday.parse(keywords, time_range)
+    elif media == AvailableMedia.TVBS:
+        result = tvbs.parse(keywords, time_range)
     # DEBUG
     BotLogger.debug(time_range)
     BotLogger.debug(keywords.__str__())
     BotLogger.debug(media.value)
 
     # TODO call target news crawler and get result
-    return "查詢新聞"
+    return result
