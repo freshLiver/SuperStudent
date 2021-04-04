@@ -49,10 +49,7 @@ def parse( keyword: list, ty: (datetime, datetime) ) :
 
 
 def match( content: str, keyword: list ) :
-    if keyword == [] or None :
-        return True
-
     for key in keyword :
-        if key in content :
-            return True
-    return False
+        if key not in content :
+            return False
+    return True
