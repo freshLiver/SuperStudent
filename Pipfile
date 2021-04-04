@@ -10,6 +10,8 @@ pydub = "*"
 speechrecognition = "*"
 gtts = "*"
 python-dateutil = "*"
+bs4 = "*"
+requests = "*"
 
 [dev-packages]
 

@@ -6,11 +6,13 @@ from botlib import BotConfig
 from botlib.botlogger import BotLogger
 
 # import crawler
-import udn
-import chinatimes
-import ltn
-import tvbs
-import ettoday
+from botlib.services.news import udn
+from botlib.services.news import chinatimes
+from botlib.services.news import ltn
+from botlib.services.news import tvbs
+from botlib.services.news import ettoday
+
+
 
 class AvailableMedia(Enum) :
     """
@@ -36,15 +38,15 @@ def search_news( time_range: (datetime, datetime), keywords: list, media: Availa
     :param media:
     :return:
     """
-    if media == AvailableMedia.UDN:
-        result = udn.parse(keywords,time_range)
-    elif media == AvailableMedia.LTN:
-        result = ltn.parse(keywords,time_range)
-    elif media == AvailableMedia.CHINATIME:
+    if media == AvailableMedia.UDN :
+        result = udn.parse(keywords, time_range)
+    elif media == AvailableMedia.LTN :
+        result = ltn.parse(keywords, time_range)
+    elif media == AvailableMedia.CHINATIME :
         result = chinatimes.parse(keywords, time_range)
-    elif media == AvailableMedia.ETTODAY:
+    elif media == AvailableMedia.ETTODAY :
         result = ettoday.parse(keywords, time_range)
-    elif media == AvailableMedia.TVBS:
+    elif media == AvailableMedia.TVBS :
         result = tvbs.parse(keywords, time_range)
     # DEBUG
     BotLogger.debug(time_range)
