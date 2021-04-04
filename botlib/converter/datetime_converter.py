@@ -32,11 +32,11 @@ class DatetimeConverter :
     __MINUTE_UNIT_FMT = "分鐘?"
 
     __CHT_NUMBER_FMT = "[零一二兩三四五六七八九十]+"
-    __CHT_DATETIME_FMT = f"({__CHT_NUMBER_FMT}個?{__YEAR___UNIT_FMT})?[的又]?"
-    __CHT_DATETIME_FMT += f"({__CHT_NUMBER_FMT}個?{__MONTH__UNIT_FMT})?[的又]?"
-    __CHT_DATETIME_FMT += f"({__CHT_NUMBER_FMT}個?{__WEEK___UNIT_FMT})?[的又]?"
-    __CHT_DATETIME_FMT += f"({__CHT_NUMBER_FMT}個?{__DATE___UNIT_FMT})?[的又]?"
-    __CHT_DATETIME_FMT += f"({__CHT_NUMBER_FMT}個?{__HOUR___UNIT_FMT})?[的又]?"
+    __CHT_DATETIME_FMT = f"({__CHT_NUMBER_FMT}個?{__YEAR___UNIT_FMT})?[又]?"
+    __CHT_DATETIME_FMT += f"({__CHT_NUMBER_FMT}個?{__MONTH__UNIT_FMT})?[又]?"
+    __CHT_DATETIME_FMT += f"({__CHT_NUMBER_FMT}個?{__WEEK___UNIT_FMT})?[又]?"
+    __CHT_DATETIME_FMT += f"({__CHT_NUMBER_FMT}個?{__DATE___UNIT_FMT})?[又]?"
+    __CHT_DATETIME_FMT += f"({__CHT_NUMBER_FMT}個?{__HOUR___UNIT_FMT})?[又]?"
     __CHT_DATETIME_FMT += f"({__CHT_NUMBER_FMT}個?{__MINUTE_UNIT_FMT})?(之?後)?"
     __CHT_DATETIME_RULE = re.compile(__CHT_DATETIME_FMT)
 
@@ -49,11 +49,11 @@ class DatetimeConverter :
     __ARABIC_HOUR___RULE = re.compile(f"{__ARABIC_NUMBER_FMT}{__HOUR___UNIT_FMT}")
     __ARABIC_MINUTE_RULE = re.compile(f"{__ARABIC_NUMBER_FMT}{__MINUTE_UNIT_FMT}")
 
-    __ARABIC_DATETIME_FMT = f"({__ARABIC_NUMBER_FMT}個?{__YEAR___UNIT_FMT})?[的又]?"
-    __ARABIC_DATETIME_FMT += f"({__ARABIC_NUMBER_FMT}個?{__MONTH__UNIT_FMT})?[的又]?"
-    __ARABIC_DATETIME_FMT += f"({__ARABIC_NUMBER_FMT}個?{__WEEK___UNIT_FMT})?[的又]?"
-    __ARABIC_DATETIME_FMT += f"({__ARABIC_NUMBER_FMT}個?{__DATE___UNIT_FMT})?[的又]?"
-    __ARABIC_DATETIME_FMT += f"({__ARABIC_NUMBER_FMT}個?{__HOUR___UNIT_FMT})?[的又]?"
+    __ARABIC_DATETIME_FMT = f"({__ARABIC_NUMBER_FMT}個?{__YEAR___UNIT_FMT})?[又]?"
+    __ARABIC_DATETIME_FMT += f"({__ARABIC_NUMBER_FMT}個?{__MONTH__UNIT_FMT})?[又]?"
+    __ARABIC_DATETIME_FMT += f"({__ARABIC_NUMBER_FMT}個?{__WEEK___UNIT_FMT})?[又]?"
+    __ARABIC_DATETIME_FMT += f"({__ARABIC_NUMBER_FMT}個?{__DATE___UNIT_FMT})?[又]?"
+    __ARABIC_DATETIME_FMT += f"({__ARABIC_NUMBER_FMT}個?{__HOUR___UNIT_FMT})?[又]?"
     __ARABIC_DATETIME_FMT += f"({__ARABIC_NUMBER_FMT}個?{__MINUTE_UNIT_FMT})?"
     __ARABIC_DATETIME_RULE = re.compile(__ARABIC_DATETIME_FMT)
 
@@ -358,7 +358,7 @@ class DatetimeConverter :
         non_empty_matches = [match_iter.group() for match_iter in matches_iter if match_iter.group() != '']
 
         # if not find any datetime fmt, return today time range
-        if non_empty_matches is [] :
+        if non_empty_matches == [] :
             # today's datetime range
             today_begin = datetime.datetime.combine(datetime.date.today(), datetime.time())
             today_finish = today_begin + datetime.timedelta(days = 1, minutes = -1)
