@@ -38,10 +38,7 @@ def parse( keyword: list, ty: (datetime, datetime) ) :
         if ty[0] < date < ty[1] :
             # get content
             text_list = soup.find("div", "article-body").select("p")
-            text = ""
-            for ele in text_list :
-                ele = str(ele).replace("<p>", "").replace("</p>", "")
-                text += ele
+            text = "".join(t.text.replace("\r", "").replace("\n", "").replace('</p>', '').replace('<p>', '') for t in text_list)
             text = re.sub('[a-zA-Z]', '', text)
             if match(text, keyword) :
                 return text
