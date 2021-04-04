@@ -19,26 +19,6 @@ class SemanticAnalyzer :
 
     # ------------------------------------------------------------------------------------------------------------
 
-    @staticmethod
-    def __parse_time_range( time_list = None ) -> (datetime, datetime) :
-        """
-        Parse Date Time Description List into Datetime Range (begin, finish)
-
-        :param time_list: Date Time Description List from NER
-        :return: Datetime Range (begin, finish), default value is today's datetime range
-        """
-
-        # get today datetime range
-        today_begin = datetime.datetime.combine(datetime.date.today(), datetime.time())
-        today_finish = today_begin + datetime.timedelta(seconds = 86399)
-
-        # TODO combine all datetime info to str
-        if time_list is not None :
-            pass
-
-        # default datetime range is today
-        return today_begin, today_finish
-
 
     # ------------------------------------------------------------------------------------------------------------
 
@@ -46,13 +26,13 @@ class SemanticAnalyzer :
     def __init__( self, speech_text: str ) :
         # text will be parsed
         self.speech_text = speech_text
-        self.parsed_content = ""
+        self.parsed_content = DatetimeConverter.standardize_datetime(speech_text)
 
         # info dict for target service
         self.obj_list = []
         self.pn_list = []
         self.event_list = []
-        self.time = SemanticAnalyzer.__parse_time_range()
+        self.time = DatetimeConverter.extract_datetime(self.parsed_content)
         self.loc_list = []
 
         # result types
@@ -67,9 +47,7 @@ class SemanticAnalyzer :
         :return: None
         """
 
-        # parse speech text with NER
-        self.parsed_content = DatetimeConverter.parse_datetime(self.speech_text)
-
+        # parse modified user speech with NER
         ner_dict = LabApi.lab_ner_api(self.parsed_content)
         BotLogger.info(f"{{{self.parsed_content}:{ner_dict}}}")
 
@@ -82,7 +60,6 @@ class SemanticAnalyzer :
         self.obj_list = ner_dict['objList']
         self.pn_list += list(ner_dict['pnList'])
         self.event_list += list(ner_dict['fullEventList'])
-        self.time = SemanticAnalyzer.__parse_time_range(ner_dict['tList'])
         self.loc_list += list(ner_dict['locList'])
 
         # determine service
