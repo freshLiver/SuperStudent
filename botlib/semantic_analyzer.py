@@ -1,10 +1,10 @@
 # project libs
-import datetime
+import re
 
 from botlib.api.labapi import LabApi
 from botlib.botlogger import BotLogger
 from botlib.converter.datetime_converter import DatetimeConverter
-from botlib.services import Services
+from botlib.services import Services, news
 
 
 
@@ -18,6 +18,50 @@ class SemanticAnalyzer :
 
 
     # ------------------------------------------------------------------------------------------------------------
+
+    def __generate_keywords_list( self ) :
+
+        # use loc, pn, obj as keywords
+        self.keywords = self.obj_list + self.pn_list + self.loc_list
+
+        # rm repeat items
+        self.keywords = list(set(self.keywords))
+        # rm useless keywords
+        for kw in self.keywords.copy() :
+            # rm single word
+            if len(kw) < 2 :
+                self.keywords.remove(kw)
+            elif kw in ["新聞", "報導"] :
+                self.keywords.remove(kw)
+            # rm media keyword
+            elif SemanticAnalyzer.__extract_media(kw) is not None :
+                self.keywords.remove(kw)
+
+
+    @staticmethod
+    def __extract_media( cht_text: str ) -> news.AvailableMedia or None :
+        """
+        Find Media From pnList From NER Result
+
+        :param cht_text: pnList from ner info
+        :return: news.AvailableMedia, None for no media Found
+        """
+
+        # TODO find available media from pn List
+        if re.search("自由時報", cht_text) :
+            return news.AvailableMedia.LTN
+        if re.search("(中國時報|中時(電子報)?)", cht_text) :
+            return news.AvailableMedia.CHINATIME
+        if re.search("TVBS", cht_text) :
+            return news.AvailableMedia.TVBS
+        if re.search("(東森|ETTODAY|新聞雲)", cht_text) :
+            return news.AvailableMedia.ETTODAY
+        if re.search("(UDN|聯合報)", cht_text) :
+            return news.AvailableMedia.UDN
+        if re.search("(成大|成功大學)", cht_text) :
+            return news.AvailableMedia.NCKU
+
+        return None
 
 
     # ------------------------------------------------------------------------------------------------------------
@@ -34,6 +78,10 @@ class SemanticAnalyzer :
         self.event_list = []
         self.time = DatetimeConverter.extract_datetime(self.parsed_content)
         self.loc_list = []
+        self.keywords = []
+
+        # media extract from speech text
+        self.media = news.AvailableMedia.NCKU
 
         # result types
         self.service = Services.UNKNOWN
@@ -56,11 +104,19 @@ class SemanticAnalyzer :
             BotLogger.info("NER Error.")
             return
 
-        # TODO (MUST IMPROVE THIS) : extract info from ner result (if result not None)
+        # NER result
         self.obj_list = ner_dict['objList']
         self.pn_list += list(ner_dict['pnList'])
         self.event_list += list(ner_dict['fullEventList'])
         self.loc_list += list(ner_dict['locList'])
+
+        # extract media from speech text
+        media = SemanticAnalyzer.__extract_media(self.speech_text)
+        if media is not None :
+            self.media = media
+
+        # generate keywords list from ner result
+        self.__generate_keywords_list()
 
         # determine service
         if self.is_search_news() :
@@ -87,9 +143,10 @@ class SemanticAnalyzer :
 
         :return: is a news searching request
         """
-        if "新聞" in self.parsed_content :
-            BotLogger.info("Is Search News")
-            return True
+        for kw in ["新聞", "報導"] :
+            if kw in self.parsed_content :
+                BotLogger.info("Is Search News")
+                return True
         return False
 
 
