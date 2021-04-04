@@ -347,7 +347,9 @@ class DatetimeConverter :
         extract and convert datetime text with arabic numeral value to datetime instance from input cht text
 
         :param any_cht_text: any cht text
-        :return: tuple of (datetime, None) or (start_datetime, end_datetime) extracted from input text
+        :return:
+        tuple of (start_datetime, end_datetime) extracted from input text.
+        if only single datetime in text, it will return (datetime found in text, 23:59 of that day)
         """
         # target datetime format
 
@@ -373,7 +375,9 @@ class DatetimeConverter :
                 end = DatetimeConverter.to_datetime(time_range[1])
                 return start, end
             else :
-                return DatetimeConverter.to_datetime(match), None
+                start = DatetimeConverter.to_datetime(match)
+                end = start.replace(hour = 23, minute = 59)
+                return start, end
 
 
 if __name__ == '__main__' :
