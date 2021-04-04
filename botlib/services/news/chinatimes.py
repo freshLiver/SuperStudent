@@ -27,12 +27,12 @@ def parse(keyword: list, ty: (datetime, datetime)):
         # get title
         s = soup.find("h1", "article-title").text
         title_list.append(s)
-        print(s)
+
         # get date
         s = soup.find("span", "date").text
         hour = soup.find("span", "hour").text
         s += " "+hour
-        print(s)
+
         date = datetime.datetime.strptime(s, '%Y/%m/%d %H:%M')
         if ty[0] < date < ty[1]:
             # get content
