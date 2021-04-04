@@ -38,7 +38,7 @@ def extract_media( cht_text: str ) -> news.AvailableMedia :
         return news.AvailableMedia.CHINATIME
     if re.search("TVBS", cht_text) :
         return news.AvailableMedia.TVBS
-    if re.search("ETTODAY(新聞雲)?", cht_text) :
+    if re.search("(東森|ETTODAY|新聞雲)?", cht_text) :
         return news.AvailableMedia.ETTODAY
     if re.search("(UDN|聯合報)", cht_text) :
         return news.AvailableMedia.UDN
@@ -63,7 +63,7 @@ def match_service( analyzer: 'SemanticAnalyzer' ) -> str :
         BotLogger.info("Unknown Request")
         return "非常抱歉，我聽不懂您的需求"
 
-    keywords = analyzer.obj_list + analyzer.pn_list + analyzer.loc_list
+    keywords = analyzer.pn_list + analyzer.loc_list
     events = analyzer.event_list
 
     if analyzer.service == Services.SEARCH_NEWS :

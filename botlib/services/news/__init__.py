@@ -23,7 +23,7 @@ class AvailableMedia(Enum) :
     LTN = "自由時報",
     CHINATIME = "中時電子報",
     TVBS = "TVBS新聞網",
-    ETTODAY = "ETtoday新聞雲",
+    ETTODAY = "東森ETToday新聞雲",
     UDN = "聯合報"
 
 
