@@ -32,11 +32,11 @@ class DatetimeConverter :
     __MINUTE_UNIT_FMT = "分鐘?"
 
     __CHT_NUMBER_FMT = "[零一二兩三四五六七八九十]+"
-    __CHT_DATETIME_FMT = f"({__CHT_NUMBER_FMT}個?{__YEAR___UNIT_FMT})?又?"
-    __CHT_DATETIME_FMT += f"({__CHT_NUMBER_FMT}個?{__MONTH__UNIT_FMT})?又?"
-    __CHT_DATETIME_FMT += f"({__CHT_NUMBER_FMT}個?{__WEEK___UNIT_FMT})?又?"
-    __CHT_DATETIME_FMT += f"({__CHT_NUMBER_FMT}個?{__DATE___UNIT_FMT})?又?"
-    __CHT_DATETIME_FMT += f"({__CHT_NUMBER_FMT}個?{__HOUR___UNIT_FMT})?又?"
+    __CHT_DATETIME_FMT = f"({__CHT_NUMBER_FMT}個?{__YEAR___UNIT_FMT})?[的又]?"
+    __CHT_DATETIME_FMT += f"({__CHT_NUMBER_FMT}個?{__MONTH__UNIT_FMT})?[的又]?"
+    __CHT_DATETIME_FMT += f"({__CHT_NUMBER_FMT}個?{__WEEK___UNIT_FMT})?[的又]?"
+    __CHT_DATETIME_FMT += f"({__CHT_NUMBER_FMT}個?{__DATE___UNIT_FMT})?[的又]?"
+    __CHT_DATETIME_FMT += f"({__CHT_NUMBER_FMT}個?{__HOUR___UNIT_FMT})?[的又]?"
     __CHT_DATETIME_FMT += f"({__CHT_NUMBER_FMT}個?{__MINUTE_UNIT_FMT})?(之?後)?"
     __CHT_DATETIME_RULE = re.compile(__CHT_DATETIME_FMT)
 
@@ -49,19 +49,22 @@ class DatetimeConverter :
     __ARABIC_HOUR___RULE = re.compile(f"{__ARABIC_NUMBER_FMT}{__HOUR___UNIT_FMT}")
     __ARABIC_MINUTE_RULE = re.compile(f"{__ARABIC_NUMBER_FMT}{__MINUTE_UNIT_FMT}")
 
-    __ARABIC_DATETIME_FMT = f"({__ARABIC_NUMBER_FMT}個?{__YEAR___UNIT_FMT})?又?"
-    __ARABIC_DATETIME_FMT += f"({__ARABIC_NUMBER_FMT}個?{__MONTH__UNIT_FMT})?又?"
-    __ARABIC_DATETIME_FMT += f"({__ARABIC_NUMBER_FMT}個?{__WEEK___UNIT_FMT})?又?"
-    __ARABIC_DATETIME_FMT += f"({__ARABIC_NUMBER_FMT}個?{__DATE___UNIT_FMT})?又?"
-    __ARABIC_DATETIME_FMT += f"({__ARABIC_NUMBER_FMT}個?{__HOUR___UNIT_FMT})?又?"
+    __ARABIC_DATETIME_FMT = f"({__ARABIC_NUMBER_FMT}個?{__YEAR___UNIT_FMT})?[的又]?"
+    __ARABIC_DATETIME_FMT += f"({__ARABIC_NUMBER_FMT}個?{__MONTH__UNIT_FMT})?[的又]?"
+    __ARABIC_DATETIME_FMT += f"({__ARABIC_NUMBER_FMT}個?{__WEEK___UNIT_FMT})?[的又]?"
+    __ARABIC_DATETIME_FMT += f"({__ARABIC_NUMBER_FMT}個?{__DATE___UNIT_FMT})?[的又]?"
+    __ARABIC_DATETIME_FMT += f"({__ARABIC_NUMBER_FMT}個?{__HOUR___UNIT_FMT})?[的又]?"
     __ARABIC_DATETIME_FMT += f"({__ARABIC_NUMBER_FMT}個?{__MINUTE_UNIT_FMT})?"
     __ARABIC_DATETIME_RULE = re.compile(__ARABIC_DATETIME_FMT)
 
     __ARABIC_FUTURE_DATETIME_FMT = __ARABIC_DATETIME_FMT + f"之?後"
     __ARABIC_FUTURE_DATETIME_RULE = re.compile(__ARABIC_FUTURE_DATETIME_FMT)
 
-    __ABSOLUTE_DATE_FMT = "%Y年%m月%d日"
-    __ABSOLUTE_DATETIME_FMT = f"{__ABSOLUTE_DATE_FMT}%H點%M分"
+    __ARABIC_DATETIME_RANGE_FMT = f"從?{__ARABIC_DATETIME_FMT}(到{__ARABIC_DATETIME_FMT})?"
+    __ARABIC_DATETIME_RANGE_RULE = re.compile(__ARABIC_DATETIME_RANGE_FMT)
+
+    __STD_DATE_FMT = "%Y年%m月%d日"
+    __STD_DATETIME_FMT = f"{__STD_DATE_FMT}%H點%M分"
 
 
     # ----------------------------------------------------------------------------------
@@ -70,7 +73,7 @@ class DatetimeConverter :
     def parse_common_date_words( any_cht_text: str ) -> str :
 
         now = datetime.datetime.now()
-        date_fmt = DatetimeConverter.__ABSOLUTE_DATE_FMT
+        date_fmt = DatetimeConverter.__STD_DATE_FMT
 
         # year
         year_rule = re.compile("[今明後]年")
@@ -270,7 +273,7 @@ class DatetimeConverter :
 
 
     @staticmethod
-    def get_absolute_future_datetime_text( relative_arabic_datetime_text: str ) -> str :
+    def get_std_future_datetime_text( relative_arabic_datetime_text: str ) -> str :
         """
         convert relative *future* datetime text to absolute datetime text base on current datetime
         
@@ -293,11 +296,11 @@ class DatetimeConverter :
             # replace relative datetime with abs datetime
             final_datetime = DatetimeConverter.to_datetime(match_text_clean, from_now = True)
 
-            return relative_arabic_datetime_text.replace(match_text, final_datetime.strftime(DatetimeConverter.__ABSOLUTE_DATETIME_FMT))
+            return relative_arabic_datetime_text.replace(match_text, final_datetime.strftime(DatetimeConverter.__STD_DATETIME_FMT))
 
 
     @staticmethod
-    def parse_datetime( any_cht_sentence: str ) -> str :
+    def standardize_datetime( any_cht_sentence: str ) -> str :
         """
         Convert *un-simplified CHT datetime text* into datetime text with arabic numeral value   
 
@@ -328,7 +331,7 @@ class DatetimeConverter :
 
         # convert datetime description to abs datetime
         for match in (future_matches for future_matches in non_empty_matches if "後" in future_matches) :
-            non_empty_matches[match] = DatetimeConverter.get_absolute_future_datetime_text(non_empty_matches[match])
+            non_empty_matches[match] = DatetimeConverter.get_std_future_datetime_text(non_empty_matches[match])
 
         # replace origin datetime strings with new string
         result = any_cht_sentence
@@ -339,24 +342,23 @@ class DatetimeConverter :
 
 
     @staticmethod
-    def extract_datetime( absolute_arabic_datetime_text: str ) -> (datetime, datetime) :
+    def extract_datetime( any_cht_text: str ) -> (datetime, datetime) :
         """
-        get datetime or datetime range from absolute datetime text with arabic numeral values
+        extract and convert datetime text with arabic numeral value to datetime instance from input cht text
 
-        :param absolute_arabic_datetime_text: absolute datetime text with arabic numeral values
-        :return: datetime(end time is None) or datetime range, today time range for datetime not found in text
+        :param any_cht_text: any cht text
+        :return: tuple of (datetime, None) or (start_datetime, end_datetime) extracted from input text
         """
-
         # target datetime format
-        fmt = f"從?{DatetimeConverter.__ARABIC_DATETIME_FMT}(到{DatetimeConverter.__ARABIC_DATETIME_FMT})?"
-        rule = re.compile(fmt)
 
         # remove useless chars and find datetime matches from it
-        sentence = re.sub("[\r\n\t ]", "", absolute_arabic_datetime_text)
-        non_empty_matches = rule.search(sentence)
+        abs_sentence = DatetimeConverter.standardize_datetime(any_cht_text)
+        clean_abs_sentence = re.sub("[\r\n\t ]", "", abs_sentence)
+        matches_iter = DatetimeConverter.__ARABIC_DATETIME_RANGE_RULE.finditer(clean_abs_sentence)
+        non_empty_matches = [match_iter.group() for match_iter in matches_iter if match_iter.group() != '']
 
         # if not find any datetime fmt, return today time range
-        if non_empty_matches is None :
+        if non_empty_matches is [] :
             # today's datetime range
             today_begin = datetime.datetime.combine(datetime.date.today(), datetime.time())
             today_finish = today_begin + datetime.timedelta(days = 1, minutes = -1)
@@ -364,7 +366,7 @@ class DatetimeConverter :
 
         # if find datetime description in text, parse it
         else :
-            match = non_empty_matches.group()
+            match = non_empty_matches[0]
             if "到" in match :
                 time_range = match.split("到")
                 start = DatetimeConverter.to_datetime(time_range[0])
@@ -378,5 +380,6 @@ if __name__ == '__main__' :
 
     # print(res)
     # res = DatetimeConverter.abs_future_time(res)
-    res = DatetimeConverter.extract_datetime("3月4號2點後")
+    text = "我想知道明天到後天有什麼活動"
+    res = DatetimeConverter.extract_datetime(text)
     print(res)
