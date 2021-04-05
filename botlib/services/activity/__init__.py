@@ -8,7 +8,7 @@ from botlib.botlogger import BotLogger
 
 
 
-def create_activity( content: str ) -> str :
+def create_activity( content: str, time_range: (datetime, datetime) ) -> str :
     # TODO call create activity function
 
     this_dir = Path(__file__).parent

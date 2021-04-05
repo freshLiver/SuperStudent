@@ -71,12 +71,12 @@ class SemanticAnalyzer :
         # text will be parsed
         self.speech_text = speech_text
         self.parsed_content = DatetimeConverter.standardize_datetime(speech_text)
+        self.time_range = DatetimeConverter.extract_datetime(self.parsed_content)
 
         # info dict for target service
         self.obj_list = []
         self.pn_list = []
         self.event_list = []
-        self.time = DatetimeConverter.extract_datetime(self.parsed_content)
         self.loc_list = []
         self.keywords = []
 

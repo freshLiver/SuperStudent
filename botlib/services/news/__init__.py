@@ -18,7 +18,6 @@ class AvailableMedia(Enum) :
     """
     Available Media Enumeration
     """
-
     NCKU = "成大新聞",
     LTN = "自由時報",
     CHINATIME = "中時電子報",
@@ -38,6 +37,11 @@ def search_news( time_range: (datetime, datetime), keywords: list, media: Availa
     :param media:
     :return:
     """
+
+    BotLogger.debug(time_range.__str__())
+    BotLogger.debug(keywords.__str__())
+    BotLogger.debug(media.value)
+
     if media == AvailableMedia.UDN :
         result = udn.parse(keywords, time_range)
     elif media == AvailableMedia.LTN :
@@ -48,10 +52,6 @@ def search_news( time_range: (datetime, datetime), keywords: list, media: Availa
         result = ettoday.parse(keywords, time_range)
     elif media == AvailableMedia.TVBS :
         result = tvbs.parse(keywords, time_range)
-    # DEBUG
-    BotLogger.debug(time_range)
-    BotLogger.debug(keywords.__str__())
-    BotLogger.debug(media.value)
 
     # TODO call target news crawler and get result
     return result

@@ -37,15 +37,15 @@ def match_service( analyzer: 'SemanticAnalyzer' ) -> str :
 
     if analyzer.service == Services.SEARCH_NEWS :
         BotLogger.info("Search News Request")
-        return news.search_news(analyzer.time, analyzer.keywords, analyzer.media)
+        return news.search_news(analyzer.time_range, analyzer.keywords, analyzer.media)
 
     elif analyzer.service == Services.SEARCH_ACTIVITY :
         BotLogger.info("Search Activity Request")
-        return activity.search_activity(analyzer.pn_list, analyzer.event_list, analyzer.time, analyzer.loc_list)
+        return activity.search_activity(analyzer.pn_list, analyzer.event_list, analyzer.time_range, analyzer.loc_list)
 
     elif analyzer.service == Services.CREATE_ACTIVITY :
         BotLogger.info("Create Activity Request")
-        return activity.create_activity(analyzer.parsed_content)
+        return activity.create_activity(analyzer.parsed_content, analyzer.time_range)
 
     else :
         BotLogger.critical("Service Matching Error. Should Never Be Here.")
