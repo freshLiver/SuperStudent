@@ -11,6 +11,7 @@ from botlib.services.news import chinatimes
 from botlib.services.news import ltn
 from botlib.services.news import tvbs
 from botlib.services.news import ettoday
+from botlib.services.news import ncku
 
 
 
@@ -52,6 +53,8 @@ def search_news( time_range: (datetime, datetime), keywords: list, media: Availa
         result = ettoday.parse(keywords, time_range)
     elif media == AvailableMedia.TVBS :
         result = tvbs.parse(keywords, time_range)
+    else :
+        result = ncku.parse(keywords, time_range)
 
     # TODO call target news crawler and get result
     return result
