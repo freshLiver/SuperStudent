@@ -6,7 +6,7 @@ from botlib import BotConfig
 class BotLogger :
     # -------------------------------------------- class variables  --------------------------------------------
     __LOGGER_MODE = logging.DEBUG
-    __LOGGER_FORMAT = "=== %(levelname)s \tLOG === %(message)s"
+    __LOGGER_FORMAT = "=== %(levelname)s \tLOG === \n%(message)s"
 
     logging.basicConfig(level = __LOGGER_MODE, format = __LOGGER_FORMAT)
     __LOGGER = logging.getLogger()

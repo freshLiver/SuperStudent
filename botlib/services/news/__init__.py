@@ -39,10 +39,6 @@ def search_news( time_range: (datetime, datetime), keywords: list, media: Availa
     :return:
     """
 
-    BotLogger.debug(time_range.__str__())
-    BotLogger.debug(keywords.__str__())
-    BotLogger.debug(media.value)
-
     if media == AvailableMedia.UDN :
         result = udn.parse(keywords, time_range)
     elif media == AvailableMedia.LTN :
@@ -57,7 +53,11 @@ def search_news( time_range: (datetime, datetime), keywords: list, media: Availa
         result = ncku.parse(keywords, time_range)
     else :
         result = "無法判斷新聞媒體"
-        BotLogger.error(result)
 
-    # TODO call target news crawler and get result
+    BotLogger.debug(f""" Search News :
+        Time Range = {time_range.__str__()},
+        Keywords = {keywords.__str__()},
+        Media = {media.value}
+        Response = {result}""")
+
     return result

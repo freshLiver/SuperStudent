@@ -97,11 +97,11 @@ class SemanticAnalyzer :
 
         # parse modified user speech with NER
         ner_dict = LabApi.lab_ner_api(self.parsed_content)
-        BotLogger.info(f"{{{self.parsed_content}:{ner_dict}}}")
+        BotLogger.debug(f"{{{self.parsed_content}:{ner_dict}}}")
 
         # ner get nothing
         if ner_dict is None :
-            BotLogger.info("NER Error.")
+            BotLogger.error("NER Error.")
             return
 
         # NER result
@@ -145,7 +145,6 @@ class SemanticAnalyzer :
         """
         for kw in ["新聞", "報導"] :
             if kw in self.parsed_content :
-                BotLogger.info("Is Search News")
                 return True
         return False
 
@@ -158,7 +157,6 @@ class SemanticAnalyzer :
         """
         for keyword in ["查詢", "什麼", "想知道", "哪些"] :
             if keyword in self.parsed_content :
-                BotLogger.info("Is Search Activity")
                 return True
         return False
 
