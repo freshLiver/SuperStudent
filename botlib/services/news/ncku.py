@@ -35,9 +35,9 @@ def parse(keyword: list, ty: (datetime, datetime)):
             text = ""
             for ele in s:
                 text += ele.text.replace("\n", "")
-                text = re.sub('[a-zA-Z]', '', text)
-                if match(text, keyword):
-                    return text
+            text = re.sub('[a-zA-Z]', '', text)
+            if match(text, keyword):
+                return text
 
     return "找不到相符結果"
 
