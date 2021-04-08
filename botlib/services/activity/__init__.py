@@ -9,8 +9,6 @@ from botlib.botlogger import BotLogger
 
 
 def create_activity( content: str, time_range: (datetime, datetime) ) -> str :
-    # TODO call create activity function
-
     this_dir = Path(__file__).parent
     db = sqlite3.connect(Path.joinpath(this_dir, "test.db"))
     cursor = db.cursor()
@@ -26,26 +24,18 @@ def create_activity( content: str, time_range: (datetime, datetime) ) -> str :
     return "新增活動"
 
 
-def search_activity( proper_nouns: list, events: list, time_range: (datetime, datetime), location: list ) -> str :
-    # TODO call find activity function
-
-    BotLogger.debug(f"people : {proper_nouns}")
-    BotLogger.debug(f"events : {events}")
-    BotLogger.debug(f"time_range : {time_range}")
-    BotLogger.debug(f"location : {location}")
-
+def search_activity( keywords: list, time_range: (datetime, datetime) ) -> str :
     # open db
     this_dir = Path(__file__).parent
     db = sqlite3.connect(Path.joinpath(this_dir, "test.db"))
     cursor = db.cursor()
 
     # select all data that that match keywords from db
-    keywords = proper_nouns + events + location
-    conditions = f"""content LIKE "%{keywords[0]}%" """
-    for kw in keywords[1 :] :
-        conditions += f""" AND content LIKE "%{kw}%" """
-
-    search_cmd = f"""SELECT * from activities WHERE {conditions}"""
+    search_cmd = "SELECT * from activities"
+    if keywords != [] :
+        search_cmd += f""" WHERE content LIKE "%{keywords[0]}%" """
+        for kw in keywords[1 :] :
+            search_cmd += f""" AND content LIKE "%{kw}%" """
 
     cursor.execute(search_cmd)
     results = cursor.fetchall()

@@ -41,7 +41,7 @@ def match_service( analyzer: 'SemanticAnalyzer' ) -> str :
 
     elif analyzer.service == Services.SEARCH_ACTIVITY :
         BotLogger.info("Search Activity Request")
-        return activity.search_activity(analyzer.pn_list, analyzer.event_list, analyzer.time_range, analyzer.loc_list)
+        return activity.search_activity(analyzer.keywords, analyzer.time_range)
 
     elif analyzer.service == Services.CREATE_ACTIVITY :
         BotLogger.info("Create Activity Request")
