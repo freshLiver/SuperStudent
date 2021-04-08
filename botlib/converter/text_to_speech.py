@@ -3,6 +3,7 @@ from pathlib import Path
 
 # project libs
 from botlib import BotConfig
+from botlib.api.labapi import LabApi
 
 
 
@@ -12,12 +13,16 @@ class TextToSpeech :
     """
 
 
-
     @staticmethod
-    def cht_to_taiwanese( chinese_text: str ) -> Path :
-        #
-        pass
+    def cht_to_taiwanese( userid: str, chinese_text: str ) -> Path :
+        """
 
+        :param userid:
+        :param chinese_text:
+        :return:
+        """
+
+        return LabApi.lab_c2t_api(userid, chinese_text)
 
 
     @staticmethod

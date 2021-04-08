@@ -87,7 +87,7 @@ class LineApi :
         """
 
         # tts to wav file
-        wav_tts_path = TextToSpeech.cht_to_chinese(userid, msg)
+        wav_tts_path = TextToSpeech.cht_to_taiwanese(userid, msg)
 
         # convert wav tts audio to m4a audio
         m4a_response_file_path = AudioConvert.wav_to_m4a(wav_tts_path)
