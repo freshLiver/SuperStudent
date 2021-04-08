@@ -384,6 +384,6 @@ if __name__ == '__main__' :
 
     # print(res)
     # res = DatetimeConverter.abs_future_time(res)
-    text = "我想知道明天到後天有什麼活動"
+    text = "我想知道五月有什麼活動"
     res = DatetimeConverter.extract_datetime(text)
     print(res)

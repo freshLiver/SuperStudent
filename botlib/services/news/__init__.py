@@ -53,8 +53,11 @@ def search_news( time_range: (datetime, datetime), keywords: list, media: Availa
         result = ettoday.parse(keywords, time_range)
     elif media == AvailableMedia.TVBS :
         result = tvbs.parse(keywords, time_range)
-    else :
+    elif media == AvailableMedia.NCKU :
         result = ncku.parse(keywords, time_range)
+    else :
+        result = "無法判斷新聞媒體"
+        BotLogger.error(result)
 
     # TODO call target news crawler and get result
     return result
