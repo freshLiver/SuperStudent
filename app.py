@@ -10,7 +10,7 @@ from botlib.services import match_service
 from botlib.semantic_analyzer import SemanticAnalyzer
 
 # flask libs
-from flask import abort, Flask, request, send_from_directory
+from flask import abort, Flask, request, send_from_directory, make_response
 
 # line bot apis
 from linebot import LineBotApi, WebhookHandler, WebhookParser
@@ -100,6 +100,13 @@ def audio( filename ) :
     except Exception as e :
         BotLogger.exception(f"Getting Audio File Error : {type(e).__name__} \n{e}")
         return None
+
+
+@app.route("/", methods = ["GET"])
+def home() :
+    res = make_response("Home Route Of My Line Bot.")
+    res.mimetype = "text/plain"
+    return res
 
 
 if __name__ == "__main__" :
