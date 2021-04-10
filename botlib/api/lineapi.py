@@ -13,7 +13,7 @@ from botlib.converter.text_to_speech import TextToSpeech
 from flask import request
 
 # line sdk
-from linebot import LineBotApi
+from linebot import LineBotApi, exceptions
 from linebot.models import AudioMessage, AudioSendMessage, TextSendMessage
 
 
@@ -22,7 +22,6 @@ class LineApi :
     """
     Simplified LineAPIs
     """
-
 
 
     @staticmethod
@@ -38,7 +37,6 @@ class LineApi :
         api = LineBotApi(channel_access_token = channel_token)
         api.reply_message(reply_token, TextSendMessage(text = msg))
         BotLogger.info(f"successfully send text message : {msg}")
-
 
 
     @staticmethod
@@ -73,6 +71,37 @@ class LineApi :
             BotLogger.exception(f"Send Audio Failed, {type(e).__name__} : {e}")
 
 
+    @staticmethod
+    def push_audio( userid, channel_token, audio_path: Path ) -> None :
+        """
+
+        :param userid:
+        :param channel_token:
+        :param audio_path:
+        :return:
+        """
+
+        try :
+            api = LineBotApi(channel_access_token = channel_token)
+
+            # get audio file duration
+            audio_duration = AudioSegment.from_file(audio_path).duration_seconds * 1000
+            # reply audio file (by url) with duration
+            audio_url = path.join(request.host_url, "audio", audio_path.name).replace("http://", "https://")
+
+            api.push_message(userid, AudioMessage(audio_url, duration = audio_duration))
+
+            BotLogger.info(f"Audio Message '{audio_path}' Pushed.")
+
+        except FileNotFoundError as fe :
+            BotLogger.exception(f"Push Audio Failed, {audio_path} FileNotFound : {fe}")
+
+        except TypeError as te :
+            BotLogger.exception(f"Push Audio Failed, {audio_path} TypeError : {te}")
+
+        except Exception as e :
+            BotLogger.exception(f"Push Audio Failed, {type(e).__name__} : {e}")
+
 
     @staticmethod
     def make_audio_message_and_send( channel_token, reply_token, userid: str, msg: str ) -> None :
@@ -87,16 +116,18 @@ class LineApi :
         """
 
         # tts to wav file
-        wav_tts_path = TextToSpeech.cht_to_taiwanese(userid, msg)
+        wav_tts_path = TextToSpeech.cht_to_chinese(userid, msg)
 
         # convert wav tts audio to m4a audio
         m4a_response_file_path = AudioConvert.wav_to_m4a(wav_tts_path)
 
         # reply this audio message
-        LineApi.send_audio(channel_token, reply_token, m4a_response_file_path)
+        try :
+            LineApi.send_audio(channel_token, reply_token, m4a_response_file_path)
+        except exceptions.LineBotApiError :
+            LineApi.push_audio(userid, channel_token = channel_token, audio_path = m4a_response_file_path)
 
         BotLogger.info(f"Send Text {msg} As Audio File : {m4a_response_file_path}")
-
 
 
     # -------------------------------------------------------------------------------------------------------
