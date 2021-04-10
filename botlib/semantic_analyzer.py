@@ -128,7 +128,7 @@ class SemanticAnalyzer :
             elif self.is_create_activity() :
                 self.service = Services.CREATE_ACTIVITY
             else :
-                self.service = Services.SEARCH_NEWS
+                self.service = Services.SEARCH_ACTIVITY
 
         else :
             self.service = Services.UNKNOWN
@@ -155,7 +155,7 @@ class SemanticAnalyzer :
 
         :return: is a activity searching request
         """
-        for keyword in ["查詢", "什麼", "想知道", "哪些"] :
+        for keyword in ["查詢", "什麼", "想知道", "哪些", ""] :
             if keyword in self.parsed_content :
                 return True
         return False
