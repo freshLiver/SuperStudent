@@ -97,7 +97,7 @@ class SemanticAnalyzer :
 
         # parse modified user speech with NER
         ner_dict = LabApi.lab_ner_api(self.parsed_content)
-        BotLogger.debug(f"{{{self.parsed_content}:{ner_dict}}}")
+        BotLogger.info(f"{{{self.parsed_content}:{ner_dict}}}")
 
         # ner get nothing
         if ner_dict is None :

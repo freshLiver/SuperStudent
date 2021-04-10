@@ -32,7 +32,7 @@ parser = WebhookParser(channel_secret = BotConfig.get_channel_secret())
 def callback() :
     signature = request.headers['X-Line-Signature']
     body = request.get_data(as_text = True)
-    BotLogger.debug(f"Get Request Body done, \n=> {body}")
+    BotLogger.info(f"Get Request Body done, \n=> {body}")
 
     # parse webhook body
     try :

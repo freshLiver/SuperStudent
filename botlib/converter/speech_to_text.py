@@ -31,7 +31,7 @@ class SpeechToText :
             text = recognizer.Recognizer().recognize_google(audio, language = 'zh-tw')
 
             # return speech audio content text
-            BotLogger.info(f"Chinese Wav {wav_audio_path.__str__()} To CHT Done.")
+            BotLogger.debug(f"Chinese Wav {wav_audio_path.__str__()} To CHT Done.")
             return text
 
         # input file not found

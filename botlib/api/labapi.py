@@ -104,7 +104,7 @@ class LabApi :
         # decode as utf-8 and convert to dict
         if result is not None :
             result = loads(str(result, "utf-8"))
-            BotLogger.info("Getting NER Result From Lab API Done.")
+            BotLogger.debug("Getting NER Result From Lab API Done.")
 
         # return result dict
         return result

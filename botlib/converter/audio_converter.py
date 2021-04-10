@@ -13,7 +13,6 @@ class AudioConvert :
     """
 
 
-
     @staticmethod
     def m4a_to_wav( m4a_file_path: Path ) -> Path :
         """
@@ -29,15 +28,18 @@ class AudioConvert :
         output_path = input_path + ".wav"
 
         # run ffmpeg to convert audio format
-        cmd_output = "----------------------------------------------------------"
-        cmd_output += popen(f"ffmpeg -y -i {input_path} {output_path} 2>&1").read()
-        cmd_output += "----------------------------------------------------------"
+        try :
+            cmd_output = "----------------------------------------------------------"
+            cmd_output += popen(f"ffmpeg -y -i {input_path} {output_path} 2>&1").read()
+            cmd_output += "----------------------------------------------------------"
 
-        BotLogger.debug(cmd_output)
+            BotLogger.debug(cmd_output)
+
+        except Exception as e :
+            BotLogger.exception(f"{type(e).__name__} = {e}")
 
         # return full path of output audio file
         return Path(expanduser(output_path))
-
 
 
     @staticmethod
@@ -54,12 +56,16 @@ class AudioConvert :
         input_path = wav_file_path.__str__()
         output_path = input_path + ".m4a"
 
-        # run ffmpeg to convert audio format
-        cmd_output = "----------------------------------------------------------\n"
-        cmd_output += popen(f"ffmpeg -y -i {input_path} {output_path} 2>&1").read()
-        cmd_output += "----------------------------------------------------------\n"
+        try :
+            # run ffmpeg to convert audio format
+            cmd_output = "----------------------------------------------------------\n"
+            cmd_output += popen(f"ffmpeg -y -i {input_path} {output_path} 2>&1").read()
+            cmd_output += "----------------------------------------------------------\n"
 
-        BotLogger.debug(cmd_output)
+            BotLogger.debug(cmd_output)
+
+        except Exception as e :
+            BotLogger.exception(f"{type(e).__name__} = {e}")
 
         # return full path of output audio file
         return Path(expanduser(output_path))

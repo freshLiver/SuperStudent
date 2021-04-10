@@ -36,7 +36,7 @@ class LineApi :
         """
         api = LineBotApi(channel_access_token = channel_token)
         api.reply_message(reply_token, TextSendMessage(text = msg))
-        BotLogger.info(f"successfully send text message : {msg}")
+        BotLogger.info(f"Successfully Send Text Message : {msg}")
 
 
     @staticmethod
@@ -59,7 +59,7 @@ class LineApi :
             api = LineBotApi(channel_access_token = channel_token)
             api.reply_message(reply_token, AudioSendMessage(audio_url, duration = audio_duration))
 
-            BotLogger.info(f"Audio Message '{file_path}' Sent.")
+            BotLogger.debug(f"Audio Message '{file_path}' Sent.")
 
         except FileNotFoundError as fe :
             BotLogger.exception(f"Send Audio Failed, {file_path} FileNotFound : {fe}")
@@ -91,7 +91,7 @@ class LineApi :
 
             api.push_message(userid, AudioMessage(audio_url, duration = audio_duration))
 
-            BotLogger.info(f"Audio Message '{audio_path}' Pushed.")
+            BotLogger.debug(f"Audio Message '{audio_path}' Pushed.")
 
         except FileNotFoundError as fe :
             BotLogger.exception(f"Push Audio Failed, {audio_path} FileNotFound : {fe}")
@@ -125,7 +125,7 @@ class LineApi :
         try :
             LineApi.send_audio(channel_token, reply_token, m4a_response_file_path)
         except exceptions.LineBotApiError :
-            LineApi.push_audio(userid, channel_token = channel_token, audio_path = m4a_response_file_path)
+            LineApi.push_audio(userid, channel_token, m4a_response_file_path)
 
         BotLogger.info(f"Send Text {msg} As Audio File : {m4a_response_file_path}")
 
@@ -156,7 +156,7 @@ class LineApi :
             for chunk in audio_message_content.iter_content() :
                 tmp_file.write(chunk)
 
-        BotLogger.info(f"Audio Message Saved as m4a At {m4a_tmp_path}.")
+        BotLogger.debug(f"Audio Message Saved as m4a At {m4a_tmp_path}.")
 
         # return full path of the input audio file
         return Path(expanduser(m4a_tmp_path))

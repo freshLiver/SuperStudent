@@ -5,7 +5,18 @@ from botlib import BotConfig
 
 class BotLogger :
     # -------------------------------------------- class variables  --------------------------------------------
-    __LOGGER_MODE = logging.DEBUG
+
+    if BotConfig.LOG_LEVEL.lower() == "info" :
+        __LOGGER_MODE = logging.INFO
+    elif BotConfig.LOG_LEVEL.lower() == "warning" :
+        __LOGGER_MODE = logging.WARNING
+    elif BotConfig.LOG_LEVEL.lower() == "error" :
+        __LOGGER_MODE = logging.ERROR
+    elif BotConfig.LOG_LEVEL.lower() == "critical" :
+        __LOGGER_MODE = logging.CRITICAL
+    else :
+        __LOGGER_MODE = logging.DEBUG
+
     __LOGGER_FORMAT = "=== %(levelname)s \tLOG === \n%(message)s"
 
     logging.basicConfig(level = __LOGGER_MODE, format = __LOGGER_FORMAT)
