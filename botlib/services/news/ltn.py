@@ -31,7 +31,7 @@ def parse( keyword: list, ty: (datetime, datetime) ) :
 
         # get date
         s = soup.find("span", "time").text
-        s = s.replace(" ", "").replace("\n", "")
+        s = s.replace(" ", "").replace("\n", "").replace("-", "/")
         date = datetime.datetime.strptime(s, '%Y/%m/%d%H:%M')
         if ty[0] < date < ty[1] :
             # get content
