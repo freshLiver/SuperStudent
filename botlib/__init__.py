@@ -33,7 +33,7 @@ class BotConfig :
     __LINE_CHANNEL_SECRET = str(__CONFIG_FILE["LINEBOT"]["line_channel_secret"])
 
     # flask port
-    __PORT = int(7777)
+    __PORT = int(80)
 
     # lab api tokens
     __LAB_NER_TOKEN = str(__CONFIG_FILE["LABAPI"]["lab_ner_token"])
