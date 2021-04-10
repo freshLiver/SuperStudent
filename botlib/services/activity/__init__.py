@@ -81,7 +81,9 @@ def search_activity( keywords: list, time_range: (datetime, datetime) ) -> str :
             search_cmd += f""" AND content LIKE "%{kw}%" """
 
         cursor.execute(search_cmd)
-        response = cursor.fetchone()[0]
+
+        if cursor.fetchone() is not None :
+            response = cursor.fetchone()[0]
 
     except Exception as e :
         BotLogger.exception(f"Search Activity Error, {type(e).__name__} => {e}")
