@@ -134,7 +134,7 @@ class SemanticAnalyzer :
             self.service = Services.UNKNOWN
             BotLogger.info("Unknown Service")
 
-        BotLogger.info("Parsing Speech Text Done.")
+        BotLogger.debug("Parsing Speech Text Done.")
 
 
     def is_search_news( self ) -> bool :
@@ -169,6 +169,5 @@ class SemanticAnalyzer :
         """
         for keyword in ["有", "舉行", "舉辦"] :
             if keyword in self.parsed_content :
-                BotLogger.info("Is Create Activity")
                 return True
         return False

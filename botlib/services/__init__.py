@@ -32,19 +32,28 @@ def match_service( analyzer: 'SemanticAnalyzer' ) -> str :
 
     # choose target service with analyzer.target_service
     if analyzer.service == Services.UNKNOWN :
-        BotLogger.info(f"Unknown Request : {analyzer.parsed_content}")
+        BotLogger.info(f"Unknown Request = {analyzer.parsed_content}")
         return "非常抱歉，我聽不懂您的需求"
 
     if analyzer.service == Services.SEARCH_NEWS :
-        BotLogger.info(f"Search News Request {analyzer.parsed_content}")
+        BotLogger.info(f"Search News Request ({analyzer.media}) : \n"
+                       f"Parse Content  = {analyzer.parsed_content} \n"
+                       f"Time Range     = {analyzer.time_range}) \n"
+                       f"Keywords       = {analyzer.keywords}")
         return news.search_news(analyzer.time_range, analyzer.keywords, analyzer.media)
 
     elif analyzer.service == Services.SEARCH_ACTIVITY :
-        BotLogger.info(f"Search Activity Request {analyzer.parsed_content}")
+        BotLogger.info(f"Search Activity Request : \n"
+                       f"Parse Content  = {analyzer.parsed_content} \n"
+                       f"Time Range     = {analyzer.time_range}) \n"
+                       f"Keywords       = {analyzer.keywords}")
         return activity.search_activity(analyzer.keywords, analyzer.time_range)
 
     elif analyzer.service == Services.CREATE_ACTIVITY :
-        BotLogger.info(f"Create Activity Request {analyzer.parsed_content}")
+        BotLogger.info(f"Create Activity Request : \n"
+                       f"Parse Content  = {analyzer.parsed_content} \n"
+                       f"Time Range     = {analyzer.time_range}) \n"
+                       f"Keywords       = {analyzer.keywords}")
         return activity.create_activity(analyzer.parsed_content, analyzer.time_range)
 
     else :

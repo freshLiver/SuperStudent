@@ -29,8 +29,9 @@ def create_activity( content: str, time_range: (datetime, datetime) ) -> str :
 
         cmd = f"""
             INSERT OR IGNORE INTO activities 
-            VALUES("{content}","{start_datetime_value}","{end_datetime_value}","{start_datetime}","{end_datetime}")
-        """
+            VALUES ("{content}",
+                    "{start_datetime_value}","{end_datetime_value}",
+                    "{start_datetime}","{end_datetime}")"""
 
         # commit change
         cursor.execute(cmd)
@@ -82,16 +83,12 @@ def search_activity( keywords: list, time_range: (datetime, datetime) ) -> str :
 
         cursor.execute(search_cmd)
 
-        if cursor.fetchone() is not None :
-            response = cursor.fetchone()[0]
+        result = cursor.fetchall()
+        if result is not None :
+            # only fetch first column of first fetch
+            response = result[0][0]
 
     except Exception as e :
         BotLogger.exception(f"Search Activity Error, {type(e).__name__} => {e}")
-
-    finally :
-        BotLogger.debug(f"""Search Activity : 
-            Keywords = {keywords.__str__()}
-            Time Range = {time_range.__str__()}
-            Response = {response}""")
 
     return response
