@@ -29,14 +29,18 @@ class AvailableMedia(Enum) :
 
 # ------------------------------------------------------------------------------------------------------------
 
+def simplify_news_content( content: str ) -> str :
+    # SAMPLE : use only first 30 words
+    return content[:30]
 
-def search_news( time_range: (datetime, datetime), keywords: list, media: AvailableMedia ) -> (str, str) :
+
+def search_news( time_range: (datetime, datetime), keywords: list, media: AvailableMedia ) -> [str, str] :
     """
 
     :param time_range:
     :param keywords:
     :param media:
-    :return: (url, text)
+    :return: [url, text]
     """
 
     if media == AvailableMedia.UDN :
@@ -53,12 +57,15 @@ def search_news( time_range: (datetime, datetime), keywords: list, media: Availa
         result = ncku.parse(keywords, time_range)
     else :
         # SAMPLE RESPONSE FORMAT
-        result = ("NO_URL", "無法判斷新聞媒體")
+        result = ["NO_URL", "無法判斷新聞媒體"]
+
+    # simplify news content
+    result[1] = simplify_news_content(result[1])
 
     BotLogger.debug(f""" Search News :
-        Time Range = {time_range.__str__()},
-        Keywords = {keywords.__str__()},
-        Media = {media.value}
-        Response = {result}""")
+        Time Range  = {time_range.__str__()},
+        Keywords    = {keywords.__str__()},
+        Media       = {media.value}
+        Result      = {result}""")
 
     return result

@@ -84,7 +84,7 @@ def search_activity( keywords: list, time_range: (datetime, datetime) ) -> str o
         cursor.execute(search_cmd)
 
         result = cursor.fetchall()
-        if result is not None :
+        if result != [] and result is not None :
             # only fetch first column of first fetch
             response = result[0][0]
 
