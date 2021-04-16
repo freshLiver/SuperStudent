@@ -6,7 +6,7 @@ from pydub import AudioSegment
 # project libs
 from botlib import BotConfig
 from botlib.botlogger import BotLogger
-from botlib.botresponse import BotResponse
+from botlib.botresponse import BotResponse, BotResponseLanguage
 from botlib.converter.audio_converter import AudioConvert
 from botlib.converter.text_to_speech import TextToSpeech
 
@@ -124,7 +124,7 @@ class LineApi :
 
 
     @staticmethod
-    def make_audio_message_and_send( channel_token, reply_token, userid: str, msg: str ) -> None :
+    def make_audio_message_and_send( channel_token, reply_token, userid: str, msg: str, language: BotResponseLanguage ) -> None :
         """
         Send a Audio Message Made By msg TTS To User
 
@@ -132,11 +132,15 @@ class LineApi :
         :param reply_token: reply token
         :param userid: user line id to determine tmp file name
         :param msg: text message that will be heard by user
+        :param language: bot response audio language
         :return: None
         """
 
         # tts to wav file
-        wav_tts_path = TextToSpeech.cht_to_chinese(userid, msg)
+        if language == BotResponseLanguage.CHINESE :
+            wav_tts_path = TextToSpeech.cht_to_chinese(userid, msg)
+        else :
+            wav_tts_path = TextToSpeech.cht_to_taiwanese(userid, msg)
 
         # convert wav tts audio to m4a audio
         m4a_response_file_path = AudioConvert.wav_to_m4a(wav_tts_path)
@@ -157,13 +161,15 @@ class LineApi :
 
         elif response.type == BotResponse.NEWS :
             LineApi.push_text(userid, channel_token, response.url)
-            LineApi.make_audio_message_and_send(channel_token, reply_token, userid, response.text)
+            LineApi.make_audio_message_and_send(channel_token, reply_token, userid, response.text, response.language)
 
         elif response.type == BotResponse.ACTIVITY :
-            LineApi.make_audio_message_and_send(channel_token, reply_token, userid, response.text)
+            LineApi.make_audio_message_and_send(channel_token, reply_token, userid, response.text, response.language)
 
         else :
             BotLogger.error("Error Response Type")
+
+        BotLogger.info(f"send response : {response.__str__()}")
 
 
     # -------------------------------------------------------------------------------------------------------

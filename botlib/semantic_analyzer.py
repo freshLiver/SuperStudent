@@ -5,6 +5,7 @@ from botlib.api.labapi import LabApi
 from botlib.botlogger import BotLogger
 from botlib.converter.datetime_converter import DatetimeConverter
 from botlib.services import Services, news
+from botlib.botresponse import BotResponseLanguage
 
 
 
@@ -17,7 +18,35 @@ class SemanticAnalyzer :
     """
 
 
+    def __init__( self, speech_text: str ) :
+        # text will be parsed
+        self.speech_text = speech_text
+        self.parsed_content = DatetimeConverter.standardize_datetime(speech_text)
+        self.time_range = DatetimeConverter.extract_datetime(self.parsed_content)
+
+        # info dict for target service
+        self.obj_list = []
+        self.pn_list = []
+        self.event_list = []
+        self.loc_list = []
+        self.keywords = []
+
+        # media extract from speech text
+        self.media = news.AvailableMedia.NCKU
+
+        # result types
+        self.service = Services.UNKNOWN
+        self.response_language = self.__change_response_lenguage()
+
+
     # ------------------------------------------------------------------------------------------------------------
+
+    def __change_response_lenguage( self ) :
+        res = re.search("(以|用)(閩南語|台語|臺語)(告訴|回答|回覆|說)", self.parsed_content)
+        if res is not None :
+            return BotResponseLanguage.TAIWANESE
+        return BotResponseLanguage.CHINESE
+
 
     def __generate_keywords_list( self ) :
 
@@ -65,26 +94,6 @@ class SemanticAnalyzer :
 
 
     # ------------------------------------------------------------------------------------------------------------
-
-
-    def __init__( self, speech_text: str ) :
-        # text will be parsed
-        self.speech_text = speech_text
-        self.parsed_content = DatetimeConverter.standardize_datetime(speech_text)
-        self.time_range = DatetimeConverter.extract_datetime(self.parsed_content)
-
-        # info dict for target service
-        self.obj_list = []
-        self.pn_list = []
-        self.event_list = []
-        self.loc_list = []
-        self.keywords = []
-
-        # media extract from speech text
-        self.media = news.AvailableMedia.NCKU
-
-        # result types
-        self.service = Services.UNKNOWN
 
 
     def parse_content( self ) -> None :

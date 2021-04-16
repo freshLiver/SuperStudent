@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from botlib import BotConfig
 from botlib.api.lineapi import LineApi
 from botlib.botlogger import BotLogger
-from botlib.botresponse import BotResponse
+from botlib.botresponse import BotResponse, BotResponseLanguage
 from botlib.converter.audio_converter import AudioConvert
 from botlib.converter.speech_to_text import SpeechToText
 from botlib.services import match_service
@@ -65,7 +65,7 @@ def callback() :
 
                 # stt error, send response audio message
                 if speech_text is None :
-                    response = BotResponse.make_inform_response("無法辨識內容，請再說一遍")
+                    response = BotResponse.make_inform_response("無法辨識內容，請再說一遍", BotResponseLanguage.CHINESE)
                     LineApi.send_response(userid, channel_token, reply_token, response)
                     BotLogger.info("Speech Text Is None.")
                     continue

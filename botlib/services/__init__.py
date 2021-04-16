@@ -43,7 +43,7 @@ def match_service( analyzer: 'SemanticAnalyzer' ) -> BotResponse or None :
                        f"Keywords       = {analyzer.keywords}")
 
         url_text = news.search_news(analyzer.time_range, analyzer.keywords, analyzer.media)
-        return BotResponse.make_news_response(news_url = url_text[0], news_content = url_text[1])
+        return BotResponse.make_news_response(url_text = url_text, language = analyzer.response_language)
 
     elif analyzer.service == Services.SEARCH_ACTIVITY :
         BotLogger.info(f"Search Activity Request : \n"
@@ -53,9 +53,9 @@ def match_service( analyzer: 'SemanticAnalyzer' ) -> BotResponse or None :
 
         result = activity.search_activity(analyzer.keywords, analyzer.time_range)
         if result is None :
-            return BotResponse.make_inform_response("找不到活動")
+            return BotResponse.make_inform_response("找不到活動", analyzer.response_language)
         else :
-            return BotResponse.make_activity_response(result)
+            return BotResponse.make_activity_response(result, analyzer.response_language)
 
     elif analyzer.service == Services.CREATE_ACTIVITY :
         BotLogger.info(f"Create Activity Request : \n"
@@ -67,10 +67,10 @@ def match_service( analyzer: 'SemanticAnalyzer' ) -> BotResponse or None :
         ambiguous_loc = (analyzer.loc_list == [])
 
         if ambiguous_loc :
-            return BotResponse.make_inform_response("新增活動失敗：活動地點不明")
+            return BotResponse.make_inform_response("新增活動失敗：活動地點不明", analyzer.response_language)
         else :
             result = activity.create_activity(analyzer.parsed_content, analyzer.time_range)
-            return BotResponse.make_inform_response(result)
+            return BotResponse.make_inform_response(result, analyzer.response_language)
 
     else :
         BotLogger.critical("Service Matching Error. Should Never Be Here.")
