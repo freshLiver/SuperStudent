@@ -156,7 +156,7 @@ class LineApi :
             LineApi.push_text(userid, channel_token, response.text)
 
         elif response.type == BotResponse.NEWS :
-            LineApi.push_text(userid, channel_token, response.text)
+            LineApi.push_text(userid, channel_token, response.url)
             LineApi.make_audio_message_and_send(channel_token, reply_token, userid, response.text)
 
         elif response.type == BotResponse.ACTIVITY :
