@@ -52,7 +52,10 @@ def match_service( analyzer: 'SemanticAnalyzer' ) -> BotResponse or None :
                        f"Keywords       = {analyzer.keywords}")
 
         result = activity.search_activity(analyzer.keywords, analyzer.time_range)
-        return BotResponse.make_activity_response(result)
+        if result is None :
+            return BotResponse.make_inform_response("找不到活動")
+        else :
+            return BotResponse.make_activity_response(result)
 
     elif analyzer.service == Services.CREATE_ACTIVITY :
         BotLogger.info(f"Create Activity Request : \n"

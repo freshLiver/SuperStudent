@@ -51,7 +51,7 @@ def create_activity( content: str, time_range: (datetime, datetime) ) -> str :
     return response
 
 
-def search_activity( keywords: list, time_range: (datetime, datetime) ) -> str :
+def search_activity( keywords: list, time_range: (datetime, datetime) ) -> str or None :
     """
 
     :param keywords:
@@ -59,7 +59,7 @@ def search_activity( keywords: list, time_range: (datetime, datetime) ) -> str :
     :return:
     """
 
-    response = "找不到活動"
+    response = None
     try :
         # open db
         this_dir = Path(__file__).parent
