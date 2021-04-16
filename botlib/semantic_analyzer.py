@@ -31,7 +31,7 @@ class SemanticAnalyzer :
             # rm single word
             if len(kw) < 2 :
                 self.keywords.remove(kw)
-            elif kw in ["新聞", "報導"] :
+            elif kw in ["新聞", "報導", "活動"] :
                 self.keywords.remove(kw)
             # rm media keyword
             elif SemanticAnalyzer.__extract_media(kw) is not None :
@@ -47,7 +47,7 @@ class SemanticAnalyzer :
         :return: news.AvailableMedia, None for no media Found
         """
 
-        # TODO find available media from pn List
+        # find available media from pn List
         if re.search("自由時報", cht_text) :
             return news.AvailableMedia.LTN
         if re.search("(中國時報|中時(電子報)?)", cht_text) :
@@ -118,11 +118,11 @@ class SemanticAnalyzer :
         # generate keywords list from ner result
         self.__generate_keywords_list()
 
-        # determine service
+        # determine service type
         if self.is_search_news() :
             self.service = Services.SEARCH_NEWS
 
-        elif self.event_list != [] or "活動" in self.obj_list :
+        elif self.is_activity() :
             if self.is_search_activity() :
                 self.service = Services.SEARCH_ACTIVITY
             elif self.is_create_activity() :
@@ -147,6 +147,18 @@ class SemanticAnalyzer :
             if kw in self.parsed_content :
                 return True
         return False
+
+
+    def is_activity( self ) -> bool :
+        """
+        user request a activity searching or creating service or not
+
+        :return: is a activity request
+        """
+        for kw in ["活動", "考試", "展", "演講"] :
+            if kw in self.obj_list :
+                return True
+        return self.event_list != []
 
 
     def is_search_activity( self ) -> bool :
