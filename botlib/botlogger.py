@@ -17,7 +17,7 @@ class BotLogger :
     else :
         __LOGGER_MODE = logging.DEBUG
 
-    __LOGGER_FORMAT = "=== %(levelname)s \tLOG === \n%(message)s"
+    __LOGGER_FORMAT = "=== %(levelname)s \tLOG === \n%(message)s\n"
 
     logging.basicConfig(level = __LOGGER_MODE, format = __LOGGER_FORMAT)
     __LOGGER = logging.getLogger()

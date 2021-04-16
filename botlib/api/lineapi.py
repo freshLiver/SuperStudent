@@ -6,6 +6,7 @@ from pydub import AudioSegment
 # project libs
 from botlib import BotConfig
 from botlib.botlogger import BotLogger
+from botlib.botresponse import BotResponse
 from botlib.converter.audio_converter import AudioConvert
 from botlib.converter.text_to_speech import TextToSpeech
 
@@ -72,6 +73,25 @@ class LineApi :
 
 
     @staticmethod
+    def push_text( userid, channel_token, text_msg: str ) -> None :
+        """
+
+        :param userid:
+        :param channel_token:
+        :param text_msg:
+        :return:
+        """
+
+        try :
+            api = LineBotApi(channel_access_token = channel_token)
+            api.push_message(userid, TextSendMessage(text = text_msg))
+            BotLogger.debug(f"Text Message '{text_msg}' Pushed.")
+
+        except Exception as e :
+            BotLogger.exception(f"Push Audio Failed, {type(e).__name__} : {e}")
+
+
+    @staticmethod
     def push_audio( userid, channel_token, audio_path: Path ) -> None :
         """
 
@@ -127,7 +147,23 @@ class LineApi :
         except exceptions.LineBotApiError :
             LineApi.push_audio(userid, channel_token, m4a_response_file_path)
 
-        BotLogger.info(f"Send Text {msg} As Audio File : {m4a_response_file_path}")
+        BotLogger.info(f"Send Text {msg} \nAs Audio File : {m4a_response_file_path}")
+
+
+    @staticmethod
+    def send_response( userid, channel_token, reply_token, response: BotResponse ) -> None :
+        if response.type == BotResponse.INFORM :
+            LineApi.push_text(userid, channel_token, response.text)
+
+        elif response.type == BotResponse.NEWS :
+            LineApi.push_text(userid, channel_token, response.text)
+            LineApi.make_audio_message_and_send(channel_token, reply_token, userid, response.text)
+
+        elif response.type == BotResponse.ACTIVITY :
+            LineApi.make_audio_message_and_send(channel_token, reply_token, userid, response.text)
+
+        else :
+            BotLogger.error("Error Response Type")
 
 
     # -------------------------------------------------------------------------------------------------------

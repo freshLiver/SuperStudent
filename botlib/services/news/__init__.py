@@ -30,13 +30,13 @@ class AvailableMedia(Enum) :
 # ------------------------------------------------------------------------------------------------------------
 
 
-def search_news( time_range: (datetime, datetime), keywords: list, media: AvailableMedia ) -> str :
+def search_news( time_range: (datetime, datetime), keywords: list, media: AvailableMedia ) -> (str, str) :
     """
-    
+
     :param time_range:
     :param keywords:
     :param media:
-    :return:
+    :return: (url, text)
     """
 
     if media == AvailableMedia.UDN :
@@ -52,7 +52,8 @@ def search_news( time_range: (datetime, datetime), keywords: list, media: Availa
     elif media == AvailableMedia.NCKU :
         result = ncku.parse(keywords, time_range)
     else :
-        result = "無法判斷新聞媒體"
+        # SAMPLE RESPONSE FORMAT
+        result = ("NO_URL", "無法判斷新聞媒體")
 
     BotLogger.debug(f""" Search News :
         Time Range = {time_range.__str__()},

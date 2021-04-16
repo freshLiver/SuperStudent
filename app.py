@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from botlib import BotConfig
 from botlib.api.lineapi import LineApi
 from botlib.botlogger import BotLogger
+from botlib.botresponse import BotResponse
 from botlib.converter.audio_converter import AudioConvert
 from botlib.converter.speech_to_text import SpeechToText
 from botlib.services import match_service
@@ -62,12 +63,10 @@ def callback() :
                 # do STT
                 speech_text = SpeechToText.chinese_to_cht(wav_tmp_path)
 
-                # default error response
-                response_text = "無法辨識內容，請再說一遍"
-
                 # stt error, send response audio message
                 if speech_text is None :
-                    LineApi.make_audio_message_and_send(channel_token, reply_token, userid, response_text)
+                    response = BotResponse.make_inform_response("無法辨識內容，請再說一遍")
+                    LineApi.send_response(userid, channel_token, reply_token, response)
                     BotLogger.info("Speech Text Is None.")
                     continue
 
@@ -77,11 +76,12 @@ def callback() :
                     analyzer.parse_content()
 
                     # get response base on analyze result
-                    response_text = match_service(analyzer = analyzer)
+                    response = match_service(analyzer = analyzer)
 
-                # send response (None for no response)
-                if response_text is not None :
-                    LineApi.make_audio_message_and_send(channel_token, reply_token, userid, response_text)
+                    # send response (None for no response)
+                    if response is not None :
+                        LineApi.send_response(userid, channel_token, reply_token, response)
+
 
     # parse bot event failed
     except InvalidSignatureError as e :
