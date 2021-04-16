@@ -19,9 +19,12 @@ class SemanticAnalyzer :
 
 
     def __init__( self, speech_text: str ) :
-        # text will be parsed
-        self.speech_text = speech_text
-        self.parsed_content = DatetimeConverter.standardize_datetime(speech_text)
+
+        # should parse and rm language specification part to avoid keywords mismatching
+        self.speech_text, self.response_language = self.__change_response_language(speech_text)
+
+        # must pass
+        self.parsed_content = DatetimeConverter.standardize_datetime(self.speech_text)
         self.time_range = DatetimeConverter.extract_datetime(self.parsed_content)
 
         # info dict for target service
@@ -36,16 +39,30 @@ class SemanticAnalyzer :
 
         # result types
         self.service = Services.UNKNOWN
-        self.response_language = self.__change_response_lenguage()
 
 
     # ------------------------------------------------------------------------------------------------------------
+    @staticmethod
+    def __change_response_language( speech_text ) -> (str, BotResponseLanguage) :
+        """
+        extract and rm language specification part from speech text to avoid keywords mismatching
 
-    def __change_response_lenguage( self ) :
-        res = re.search("(以|用)(閩南語|台語|臺語)(告訴|回答|回覆|說)", self.parsed_content)
-        if res is not None :
-            return BotResponseLanguage.TAIWANESE
-        return BotResponseLanguage.CHINESE
+        :return: tuple of  (speech text without language specification parts, BotResponseLanguage obj)
+        """
+
+        # extract language specification part from speech text
+        chinese_rule = "(以|用)(中文|國語)((告訴|回答|回覆)我?|說)"
+        taiwanese_rule = "(以|用)(閩南語|台語|臺語)((告訴|回答|回覆)我?|說)"
+
+        if re.search(chinese_rule, speech_text) is not None :
+            speech_text = re.sub(chinese_rule, "", speech_text)
+            return speech_text, BotResponseLanguage.CHINESE
+
+        if re.search(taiwanese_rule, speech_text) is not None :
+            speech_text = re.sub(taiwanese_rule, "", speech_text)
+            return speech_text, BotResponseLanguage.TAIWANESE
+
+        return speech_text, BotResponseLanguage.CHINESE
 
 
     def __generate_keywords_list( self ) :
