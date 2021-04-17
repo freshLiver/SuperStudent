@@ -50,8 +50,8 @@ def parse(keyword: list, ty: (datetime, datetime)):
                 text = re.sub('[a-zA-Z]', '', text)
                 text = text.replace("～開啟小鈴鐺　 頻道新聞搶先看　快點我按讚訂閱～最話題在這！想跟上時事，快點我加入新聞好友！", "")
                 if match(text, keyword):
-                    return text
-    return "找不到相符結果"
+                    return [link, text[:30]]
+    return ["NO_URL", "找不到相符結果"]
 
 
 def match(content: str, keyword: list):
