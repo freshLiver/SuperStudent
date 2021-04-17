@@ -39,9 +39,8 @@ def parse( keyword: list, ty: (datetime, datetime) ) :
             text = "".join(t.text.replace("\r", "").replace("\n", "").replace('</p>', '').replace('<p>', '') for t in text_list)
             text = re.sub('[a-zA-Z]', '', text)
             if match(text, keyword) :
-                return text
-
-    return "找不到相符結果"
+                return [link, text[:30]]
+    return ["NO_URL", "找不到相符結果"]
 
 
 def match( content: str, keyword: list ) :
