@@ -6,12 +6,7 @@ from botlib import BotConfig
 from botlib.botlogger import BotLogger
 
 # import crawler
-from botlib.services.news import udn
-from botlib.services.news import chinatimes
-from botlib.services.news import ltn
-from botlib.services.news import tvbs
-from botlib.services.news import ettoday
-from botlib.services.news import ncku
+from botlib.services.news import udn, chinatimes, ltn, tvbs, ettoday, ncku
 
 
 
@@ -60,7 +55,7 @@ def search_news( time_range: (datetime, datetime), keywords: list, media: Availa
         result = ["NO_URL", "無法判斷新聞媒體"]
 
     # simplify news content
-    result[1] = simplify_news_content(result[1])
+    result[1] = result[1] + "..."
 
     BotLogger.debug(f""" Search News :
         Time Range  = {time_range.__str__()},
