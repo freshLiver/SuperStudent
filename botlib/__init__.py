@@ -34,6 +34,7 @@ class BotConfig :
 
     # flask port
     PORT = int(__CONFIG_FILE["GENERAL"]["port"])
+    HANLP_URL = f"http://localhost:{PORT}/HANLP"
 
     # log level
     LOG_LEVEL = str(__CONFIG_FILE["GENERAL"]["log_level"])
