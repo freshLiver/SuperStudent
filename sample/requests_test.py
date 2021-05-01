@@ -7,18 +7,15 @@ from requests import post
 path.append("..")
 
 # proj libs
-from botlib import BotConfig
+from botlib.api.hanlpapi import HanlpAPI
 
 
 
 if __name__ == '__main__' :
-    data = { "sentences" : "這是測試句子", "custom_dict" : { } }
-    json_data = json.dumps(data)
-    res = post(BotConfig.HANLP_URL, json = json_data)
 
-    try :
-        result = json.loads(res.text)
-    except Exception as e :
-        result = res.text
+    sentences = ["這是第一句測試句", "所以這就是第二句"]
+    custom_dict = ["測試句"]
+
+    result = HanlpAPI.parse_sentences(sentences, custom_dict)
 
     print(result)
