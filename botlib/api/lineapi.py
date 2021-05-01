@@ -191,7 +191,7 @@ class LineApi :
         audio_message_content = line_bot_api.get_message_content(audio_message.id)
 
         # where this audio should be saved
-        m4a_tmp_path = BotConfig.file_path_from(BotConfig.get_audio_input_dir(), userid)
+        m4a_tmp_path = BotConfig.file_path_from(BotConfig.AUDIO_INPUT_TMP_DIR, userid)
 
         # write audio message content to tmp file
         with open(m4a_tmp_path, 'wb') as tmp_file :

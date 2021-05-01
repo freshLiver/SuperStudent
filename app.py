@@ -23,9 +23,9 @@ from linebot.models import MessageEvent, AudioMessage
 # create global app instance
 app = Flask(__name__)
 
-line_bot_api = LineBotApi(channel_access_token = BotConfig.get_channel_token())
-handler = WebhookHandler(channel_secret = BotConfig.get_channel_secret())
-parser = WebhookParser(channel_secret = BotConfig.get_channel_secret())
+line_bot_api = LineBotApi(channel_access_token = BotConfig.LINE_CHANNEL_TOKEN)
+handler = WebhookHandler(channel_secret = BotConfig.LINE_CHANNEL_SECRET)
+parser = WebhookParser(channel_secret = BotConfig.LINE_CHANNEL_SECRET)
 
 
 # receive line message event
@@ -52,7 +52,7 @@ def callback() :
                 # get userid, reply_token, channel_token
                 userid = event.source.user_id
                 reply_token = event.reply_token
-                channel_token = BotConfig.get_channel_token()
+                channel_token = BotConfig.LINE_CHANNEL_TOKEN
 
                 # save audio message as a file
                 m4a_tmp_path = LineApi.save_audio_message_as_m4a(userid, event.message, line_bot_api)
@@ -95,11 +95,16 @@ def callback() :
 def audio( filename ) :
     try :
         BotLogger.info(f"Audio Request : audio/{filename}")
-        return send_from_directory(BotConfig.get_audio_output_dir(), filename)
+        return send_from_directory(BotConfig.AUDIO_OUTPUT_TMP_DIR, filename)
 
     except Exception as e :
         BotLogger.exception(f"Getting Audio File Error : {type(e).__name__} \n{e}")
         return None
+
+
+@app.route("/nlp", methods = ["GET"])
+def nlp() :
+    return None
 
 
 @app.route("/", methods = ["GET"])
@@ -110,4 +115,4 @@ def home() :
 
 
 if __name__ == "__main__" :
-    app.run(port = BotConfig.get_flask_app_port(), debug = True)
+    app.run(port = BotConfig.PORT, debug = True)

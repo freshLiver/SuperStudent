@@ -98,11 +98,11 @@ class SemanticAnalyzer :
             return news.AvailableMedia.LTN
         if re.search("(中國時報|中時(電子報)?)", cht_text) :
             return news.AvailableMedia.CHINATIME
-        if re.search("TVBS", cht_text) :
+        if re.search("TVBS", cht_text, re.IGNORECASE) :
             return news.AvailableMedia.TVBS
-        if re.search("(東森|ETTODAY|新聞雲)", cht_text) :
+        if re.search("(東森|ETTODAY|新聞雲)", cht_text, re.IGNORECASE) :
             return news.AvailableMedia.ETTODAY
-        if re.search("(UDN|聯合報)", cht_text) :
+        if re.search("(UDN|聯合報)", cht_text, re.IGNORECASE) :
             return news.AvailableMedia.UDN
         if re.search("(成大|成功大學)", cht_text) :
             return news.AvailableMedia.NCKU

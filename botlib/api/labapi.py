@@ -96,10 +96,10 @@ class LabApi :
         """
 
         # get ner token
-        token = BotConfig.get_lab_ner_token()
+        token = BotConfig.LAB_NER_TOKEN
 
         # send content to server and recv ner result
-        result = LabApi.__base_sender(token, cht_text, BotConfig.get_lab_ner_host_port())
+        result = LabApi.__base_sender(token, cht_text, BotConfig.LAB_NER_HOST_PORT)
 
         # decode as utf-8 and convert to dict
         if result is not None :
@@ -123,16 +123,16 @@ class LabApi :
         """
 
         # get api token
-        token = BotConfig.get_lab_c2t_token()
+        token = BotConfig.LAB_C2T_TOKEN
 
         # send text to server and get result
-        speech_data = LabApi.__base_sender(token, cht_text, BotConfig.get_lab_c2t_host_port())
+        speech_data = LabApi.__base_sender(token, cht_text, BotConfig.LAB_C2T_HOST_PORT)
 
         # if result not None, output bytes to file.wav
         if speech_data is not None :
             try :
                 # determine speech output dir
-                output = BotConfig.file_path_from(BotConfig.get_audio_output_dir(), userid, ".wav")
+                output = BotConfig.file_path_from(BotConfig.AUDIO_OUTPUT_TMP_DIR, userid, ".wav")
 
                 # output api response bytes to target file
                 with open(output, "wb") as file :

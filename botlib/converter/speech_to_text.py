@@ -12,7 +12,6 @@ class SpeechToText :
     """
 
 
-
     @staticmethod
     def chinese_to_cht( wav_audio_path: Path ) -> str or None :
         """
@@ -50,7 +49,7 @@ if __name__ == '__main__' :
 
 
 
-    wav_path = BotConfig.file_path_from(BotConfig.get_audio_input_dir(), "test.input", postfix = ".wav")
+    wav_path = BotConfig.file_path_from(BotConfig.AUDIO_INPUT_TMP_DIR, "test.input", postfix = ".wav")
     res = SpeechToText.chinese_to_cht(wav_path)
 
     if res is not None :

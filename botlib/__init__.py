@@ -14,143 +14,37 @@ class BotConfig :
     __THIS_FILE = Path(__file__)
 
     # project root dir abs path
-    __PROJECT_ROOT = expanduser(__THIS_FILE.parent.parent)
+    PROJECT_ROOT = expanduser(__THIS_FILE.parent.parent)
 
     # abs path for saving audio messages received from user
-    __AUDIO_INPUT_TMP = join(__PROJECT_ROOT, "audio_input_tmp")
-    __AUDIO_OUTPUT_TMP = join(__PROJECT_ROOT, "audio_output_tmp")
+    AUDIO_INPUT_TMP_DIR = join(PROJECT_ROOT, "audio_input_tmp")
+    AUDIO_OUTPUT_TMP_DIR = join(PROJECT_ROOT, "audio_output_tmp")
 
     # try to create input audio message tmp dir
-    system(f"mkdir {__AUDIO_INPUT_TMP}")
-    system(f"mkdir {__AUDIO_OUTPUT_TMP}")
+    system(f"mkdir {AUDIO_INPUT_TMP_DIR}")
+    system(f"mkdir {AUDIO_OUTPUT_TMP_DIR}")
 
     # abs path of config.ini file
     __CONFIG_FILE = configparser.ConfigParser()
-    __CONFIG_FILE.read(join(__PROJECT_ROOT, "config.ini"))
+    __CONFIG_FILE.read(join(PROJECT_ROOT, "config.ini"))
 
     # LINE BOT Channel Token & Secret
-    __LINE_CHANNEL_TOKEN = str(__CONFIG_FILE["LINEBOT"]["line_channel_access_token"])
-    __LINE_CHANNEL_SECRET = str(__CONFIG_FILE["LINEBOT"]["line_channel_secret"])
+    LINE_CHANNEL_TOKEN = str(__CONFIG_FILE["LINEBOT"]["line_channel_access_token"])
+    LINE_CHANNEL_SECRET = str(__CONFIG_FILE["LINEBOT"]["line_channel_secret"])
 
     # flask port
-    __PORT = int(__CONFIG_FILE["GENERAL"]["port"])
+    PORT = int(__CONFIG_FILE["GENERAL"]["port"])
 
     # log level
     LOG_LEVEL = str(__CONFIG_FILE["GENERAL"]["log_level"])
 
     # lab api tokens
-    __LAB_NER_TOKEN = str(__CONFIG_FILE["LABAPI"]["lab_ner_token"])
-    __LAB_C2T_TOKEN = str(__CONFIG_FILE["LABAPI"]["lab_c2t_token"])
+    LAB_NER_TOKEN = str(__CONFIG_FILE["LABAPI"]["lab_ner_token"])
+    LAB_C2T_TOKEN = str(__CONFIG_FILE["LABAPI"]["lab_c2t_token"])
 
     # lab api hosts and ports
-    __LAB_NER_HOST_PORT = ("140.116.245.151", 9921)
-    __LAB_C2T_HOST_PORT = ("140.116.245.147", 50010)
-
-
-    # --------------------------------------------------------------------------------------------------------
-
-    @staticmethod
-    def get_project_root() -> str :
-        """
-        get absolute path of the root dir of this project
-
-        :return: absolute path of project root
-        """
-        return BotConfig.__PROJECT_ROOT
-
-
-    @staticmethod
-    def get_channel_token() -> str :
-        """
-        get channel token of my line bot
-
-        :return: channel token string
-        """
-        return BotConfig.__LINE_CHANNEL_TOKEN
-
-
-    @staticmethod
-    def get_channel_secret() -> str :
-        """
-        get channel secret of my line bot
-
-        :return: channel secret string
-        """
-        return BotConfig.__LINE_CHANNEL_SECRET
-
-
-    @staticmethod
-    def get_flask_app_port() -> int :
-        """
-        get port number of this flask app
-
-        :return: port number
-        """
-        return BotConfig.__PORT
-
-
-    # -------------------------------------------------------------------------------------------------------
-
-    @staticmethod
-    def get_audio_input_dir() -> str :
-        """
-        get full path of audio input tmp dir
-
-        :return: audio input tmp dir path
-        """
-        return BotConfig.__AUDIO_INPUT_TMP
-
-
-    @staticmethod
-    def get_audio_output_dir() -> str :
-        """
-        get full path audio output tmp dir
-
-        :return: audio output tmp dir path
-        """
-        return BotConfig.__AUDIO_OUTPUT_TMP
-
-
-    # -------------------------------------------------------------------------------------------------------
-
-    @staticmethod
-    def get_lab_ner_token() -> str :
-        """
-        Get WMMKS Lab's NER System API Token
-        
-        :return: user token
-        """
-        return BotConfig.__LAB_NER_TOKEN
-
-
-    @staticmethod
-    def get_lab_ner_host_port() -> tuple :
-        """
-        Get WMMKS Lab's NER System API Host ip and port
-        
-        :return:
-        """
-        return BotConfig.__LAB_NER_HOST_PORT
-
-
-    @staticmethod
-    def get_lab_c2t_token() -> str :
-        """
-        Get WMMKS Lab's CHT Text to Taiwanese Speech System API Token
-        
-        :return: Chinese Text to Taiwanese Speech Token
-        """
-        return BotConfig.__LAB_C2T_TOKEN
-
-
-    @staticmethod
-    def get_lab_c2t_host_port() -> tuple :
-        """
-        Get WMMKS Lab's CHT Text to Taiwanese Speech System API Host ip and port
-
-        :return:
-        """
-        return BotConfig.__LAB_C2T_HOST_PORT
+    LAB_NER_HOST_PORT = ("140.116.245.151", 9921)
+    LAB_C2T_HOST_PORT = ("140.116.245.147", 50010)
 
 
     # -------------------------------------------------------------------------------------------------------

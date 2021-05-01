@@ -73,6 +73,6 @@ class AudioConvert :
 
 if __name__ == '__main__' :
 
-    m4a_input = Path(path.join(BotConfig.get_audio_input_dir(), "test.input"))
+    m4a_input = Path(path.join(BotConfig.AUDIO_INPUT_TMP_DIR, "test.input"))
     wav_output = AudioConvert.m4a_to_wav(m4a_input)
     m4a_output = AudioConvert.wav_to_m4a(wav_output)
