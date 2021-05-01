@@ -1,5 +1,10 @@
 import json
+from sys import path
 from requests import post
+
+
+
+path.append("..")
 
 # proj libs
 from botlib import BotConfig
