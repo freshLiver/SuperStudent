@@ -12,6 +12,7 @@ gtts = "*"
 python-dateutil = "*"
 bs4 = "*"
 requests = "*"
+geopy = "*"
 
 [dev-packages]
 
