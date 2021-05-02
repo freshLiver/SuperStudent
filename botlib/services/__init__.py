@@ -33,8 +33,9 @@ def match_service( analyzer: 'SemanticAnalyzer' ) -> BotResponse or None :
 
     # choose target service with analyzer.target_service
     if analyzer.service == Services.UNKNOWN :
+        msg = f"非常抱歉，我聽不懂您的需求 ({analyzer.speech_text})"
         BotLogger.info(f"Unknown Request = {analyzer.parsed_content}")
-        return BotResponse.make_inform_response("非常抱歉，我聽不懂您的需求")
+        return BotResponse.make_inform_response(msg, analyzer.response_language)
 
     if analyzer.service == Services.SEARCH_NEWS :
         BotLogger.info(f"Search News Request ({analyzer.media}) : \n"
@@ -45,7 +46,7 @@ def match_service( analyzer: 'SemanticAnalyzer' ) -> BotResponse or None :
         url_text = news.search_news(analyzer.time_range, analyzer.keywords, analyzer.media)
 
         if url_text[0] == "NO_URL" :
-            return None
+            return BotResponse.make_inform_response("找不到相符的新聞", language = analyzer.response_language)
 
         return BotResponse.make_news_response(url_text = url_text, language = analyzer.response_language)
 

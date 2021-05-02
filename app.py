@@ -88,6 +88,8 @@ def callback() :
                     # send response (None for no response)
                     if response is not None :
                         LineApi.send_response(userid, channel_token, reply_token, response)
+                    else :
+                        BotLogger.info(f"Match Service Return None, Request : {speech_text}")
 
 
     # parse bot event failed
