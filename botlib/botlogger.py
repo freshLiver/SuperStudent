@@ -17,7 +17,7 @@ class BotLogger :
     else :
         __LOGGER_MODE = logging.DEBUG
 
-    __LOGGER_FORMAT = "=== %(levelname)s \tLOG === \n%(message)s\n"
+    __LOGGER_FORMAT = "=== === === %(levelname)s \tLOG === === === \n%(message)s\n"
 
     logging.basicConfig(level = __LOGGER_MODE, format = __LOGGER_FORMAT)
     __LOGGER = logging.getLogger()
@@ -52,3 +52,13 @@ class BotLogger :
     @staticmethod
     def exception( msg: str ) :
         BotLogger.__LOGGER.exception(msg, exc_info = True)
+
+
+    # -------------------------------------------- formatting methods  --------------------------------------------
+
+    @staticmethod
+    def prettify_dict_log( src: dict, prefix = "Dict :" ) -> str :
+        prettified = prefix
+        for key in src :
+            prettified += f"\t{key} : \n\t\t{src[key]}\n"
+        return prettified

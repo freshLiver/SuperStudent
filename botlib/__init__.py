@@ -38,7 +38,7 @@ class BotConfig :
     HANLP_TEST_URL = "https://linebotdemo.loca.lt/HANLP"
 
     # log level
-    LOG_LEVEL = str(__CONFIG_FILE["GENERAL"]["log_level"])
+    LOG_LEVEL = "info"
 
     # lab api tokens
     LAB_NER_TOKEN = str(__CONFIG_FILE["LABAPI"]["lab_ner_token"])

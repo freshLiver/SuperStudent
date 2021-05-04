@@ -133,17 +133,13 @@ class SemanticAnalyzer :
         # parse modified user speech
         BotLogger.info(f"Parsing Sentence : {self.parsed_content}")
         ws_pos_ner = HanlpApi.parse_sentence(self.parsed_content)
-
-        prettified_dict = "Parse Result : \n"
-        for key in ws_pos_ner :
-            prettified_dict += f"\t{key} : \n\t\t{ws_pos_ner[key]}\n"
-        BotLogger.info(prettified_dict)
+        BotLogger.info(BotLogger.prettify_dict_log(ws_pos_ner, "Parse Result : \n"))
 
         #
         if ws_pos_ner is not None :
             # classify common ner types into dict
             catalogs = HanlpApi.classify_common_words(ws_pos_ner["NER"])
-            BotLogger.info(f"Catalogs Dict : {catalogs}")
+            BotLogger.info(BotLogger.prettify_dict_log(catalogs, "Catalogs Dict : \n"))
 
             self.people = catalogs[NerCatalogs.PERSON.value]
             self.organizations = catalogs[NerCatalogs.ORGANIZATION.value]
