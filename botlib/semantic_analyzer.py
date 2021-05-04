@@ -1,6 +1,7 @@
 # project libs
-import re
+import re, json
 
+from botlib.api.hanlpapi import HanlpApi, NerCatalogs
 from botlib.api.labapi import LabApi
 from botlib.botlogger import BotLogger
 from botlib.converter.datetime_converter import DatetimeConverter
@@ -27,11 +28,13 @@ class SemanticAnalyzer :
         self.parsed_content = DatetimeConverter.standardize_datetime(self.speech_text)
         self.time_range = DatetimeConverter.extract_datetime(self.parsed_content)
 
-        # info dict for target service
-        self.obj_list = []
-        self.pn_list = []
-        self.event_list = []
-        self.loc_list = []
+        # information that extract from user speech
+        self.people = []
+        self.organizations = []
+        self.date = []
+        self.time = []
+        self.locations = []
+
         self.keywords = []
 
         # media extract from speech text
@@ -65,23 +68,29 @@ class SemanticAnalyzer :
         return speech_text, BotResponseLanguage.CHINESE
 
 
-    def __generate_keywords_list( self ) :
+    def __extract_keywords( self, ws_pos_ner: dict ) :
 
-        # use loc, pn, obj as keywords
-        self.keywords = self.obj_list + self.pn_list + self.loc_list
+        # stupidly rm repeat items
+        tmp_list = HanlpApi.extract_keywords(ws_pos_ner["WS"], ws_pos_ner["POS"])
+        tmp_list += self.people + self.organizations + self.locations
+        tmp_list = list(set(tmp_list))
 
-        # rm repeat items
-        self.keywords = list(set(self.keywords))
         # rm useless keywords
-        for kw in self.keywords.copy() :
+        self.keywords = []
+
+        for keyword in tmp_list :
             # rm single word
-            if len(kw) < 2 :
-                self.keywords.remove(kw)
-            elif kw in ["新聞", "報導", "活動"] :
-                self.keywords.remove(kw)
+            if len(keyword) < 2 :
+                continue
+            elif keyword in ["新聞", "報導", "活動"] :
+                continue
             # rm media keyword
-            elif SemanticAnalyzer.__extract_media(kw) is not None :
-                self.keywords.remove(kw)
+            elif SemanticAnalyzer.__extract_media(keyword) is not None :
+                continue
+
+            self.keywords.append(keyword)
+
+        BotLogger.info(f"Extract keywords : {self.keywords}")
 
 
     @staticmethod
@@ -121,28 +130,35 @@ class SemanticAnalyzer :
         :return: None
         """
 
-        # parse modified user speech with NER
-        ner_dict = LabApi.lab_ner_api(self.parsed_content)
-        BotLogger.info(f"{{{self.parsed_content}:{ner_dict}}}")
+        # parse modified user speech
+        BotLogger.info(f"Parsing Sentence : {self.parsed_content}")
+        ws_pos_ner = HanlpApi.parse_sentence(self.parsed_content)
 
-        # ner get nothing
-        if ner_dict is None :
-            BotLogger.error("NER Error.")
-            return
+        prettified_dict = "Parse Result : \n"
+        for key in ws_pos_ner :
+            prettified_dict += f"\t{key} : \n\t\t{ws_pos_ner[key]}\n"
+        BotLogger.info(prettified_dict)
 
-        # NER result
-        self.obj_list = ner_dict['objList']
-        self.pn_list += list(ner_dict['pnList'])
-        self.event_list += list(ner_dict['fullEventList'])
-        self.loc_list += list(ner_dict['locList'])
+        #
+        if ws_pos_ner is not None :
+            # classify common ner types into dict
+            catalogs = HanlpApi.classify_common_words(ws_pos_ner["NER"])
+            BotLogger.info(f"Catalogs Dict : {catalogs}")
+
+            self.people = catalogs[NerCatalogs.PERSON.value]
+            self.organizations = catalogs[NerCatalogs.ORGANIZATION.value]
+            self.date = catalogs[NerCatalogs.DATE.value]
+            self.time = catalogs[NerCatalogs.TIME.value]
+            self.locations = catalogs[NerCatalogs.LOCATION.value]
+            self.locations.sort(key = len)
+
+            # generate keyword list from ws, pos, ner results
+            self.__extract_keywords(ws_pos_ner)
 
         # extract media from speech text
         media = SemanticAnalyzer.__extract_media(self.speech_text)
         if media is not None :
             self.media = media
-
-        # generate keywords list from ner result
-        self.__generate_keywords_list()
 
         # determine service type
         if self.is_search_news() :
@@ -182,9 +198,9 @@ class SemanticAnalyzer :
         :return: is a activity request
         """
         for kw in ["活動", "考試", "展", "演講"] :
-            if kw in self.obj_list :
+            if kw in self.parsed_content :
                 return True
-        return self.event_list != []
+        return False
 
 
     def is_search_activity( self ) -> bool :

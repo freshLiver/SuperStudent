@@ -69,7 +69,7 @@ def match_service( analyzer: 'SemanticAnalyzer' ) -> BotResponse or None :
                        f"Keywords       = {analyzer.keywords}")
 
         # TODO : reject ambiguous content
-        ambiguous_loc = (analyzer.loc_list == [])
+        ambiguous_loc = (analyzer.locations == [])
 
         if ambiguous_loc :
             return BotResponse.make_inform_response("地點不明，請補上活動舉辦的地點", analyzer.response_language)
