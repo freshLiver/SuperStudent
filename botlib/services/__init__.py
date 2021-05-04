@@ -38,10 +38,7 @@ def match_service( analyzer: 'SemanticAnalyzer' ) -> BotResponse or None :
         return BotResponse.make_inform_response(msg, analyzer.response_language)
 
     if analyzer.service == Services.SEARCH_NEWS :
-        BotLogger.info(f"Search News Request ({analyzer.media}) : \n"
-                       f"Parse Content  = {analyzer.parsed_content} \n"
-                       f"Time Range     = {analyzer.time_range}) \n"
-                       f"Keywords       = {analyzer.keywords}")
+        BotLogger.info(analyzer.__str__())
 
         url_text = news.search_news(analyzer.time_range, analyzer.keywords, analyzer.media)
 
@@ -51,22 +48,20 @@ def match_service( analyzer: 'SemanticAnalyzer' ) -> BotResponse or None :
         return BotResponse.make_news_response(url_text = url_text, language = analyzer.response_language)
 
     elif analyzer.service == Services.SEARCH_ACTIVITY :
-        BotLogger.info(f"Search Activity Request : \n"
-                       f"Parse Content  = {analyzer.parsed_content} \n"
-                       f"Time Range     = {analyzer.time_range}) \n"
-                       f"Keywords       = {analyzer.keywords}")
+        BotLogger.info(analyzer.__str__())
 
         result = activity.search_activity(analyzer.keywords, analyzer.time_range)
+
+        # TODO : get main location from result text using hanlp
+        location = None
+
         if result is None :
             return BotResponse.make_inform_response("找不到活動", analyzer.response_language)
         else :
-            return BotResponse.make_activity_response(result, analyzer.response_language)
+            return BotResponse.make_activity_response(result, location, analyzer.response_language)
 
     elif analyzer.service == Services.CREATE_ACTIVITY :
-        BotLogger.info(f"Create Activity Request : \n"
-                       f"Parse Content  = {analyzer.parsed_content} \n"
-                       f"Time Range     = {analyzer.time_range}) \n"
-                       f"Keywords       = {analyzer.keywords}")
+        BotLogger.info(analyzer.__str__())
 
         # TODO : reject ambiguous content
         ambiguous_loc = (analyzer.locations == [])

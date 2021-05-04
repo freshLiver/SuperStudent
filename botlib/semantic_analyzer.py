@@ -44,6 +44,27 @@ class SemanticAnalyzer :
         self.service = Services.UNKNOWN
 
 
+    def __str__( self ) :
+
+        content = ""
+
+        # check request mode
+        if self.service == Services.SEARCH_NEWS :
+            content += f"Search {self.media} News Request : \n"
+        elif self.service == Services.SEARCH_ACTIVITY :
+            content += f"Search Activity Request : \n"
+        elif self.service == Services.CREATE_ACTIVITY :
+            content += f"Create Activity Request : \n"
+        else :
+            return "Unknown Service"
+
+        content += f"  * Parse Content  = {self.parsed_content} \n"
+        content += f"  * Time Range     = {self.time_range}) \n"
+        content += f"  * Keywords       = {self.keywords}"
+
+        return content
+
+
     # ------------------------------------------------------------------------------------------------------------
     @staticmethod
     def __change_response_language( speech_text ) -> (str, BotResponseLanguage) :

@@ -15,10 +15,11 @@ class BotResponse :
 
 
     def __init__( self, language: BotResponseLanguage ) :
+        self.url = None
+        self.text = None
+        self.location = None
         self.language = language
         self.type = BotResponse.INFORM
-        self.text = "Default Inform Text"
-        self.url = None
 
 
     def __str__( self ) -> str :
@@ -26,6 +27,7 @@ class BotResponse :
         msg += f"Type : {self.type}\n"
         msg += f"Text : {self.text}\n"
         msg += f"Link : {self.url}\n"
+        msg += f"Loc  : {self.location}\n"
         msg += f"Lang : {self.language.value}\n"
         return msg
 
@@ -40,10 +42,11 @@ class BotResponse :
 
 
     @staticmethod
-    def make_activity_response( activity_content: str, language: BotResponseLanguage ) -> 'BotResponse' :
+    def make_activity_response( activity_content: str, location: str or None, language: BotResponseLanguage ) -> 'BotResponse' :
         response = BotResponse(language)
         response.type = BotResponse.ACTIVITY
         response.text = activity_content
+        response.location = location
         return response
 
 
