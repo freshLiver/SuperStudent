@@ -5,21 +5,26 @@ from botlib.botlogger import BotLogger
 
 
 
-class GeoAPI :
+class GeoApi :
     """
 
     """
-    geolocator = Nominatim(user_agent = "SuperStudentBot")
+    geo_locator = Nominatim(user_agent = "SuperStudentBot")
 
 
     @staticmethod
-    def get_coordinate( address: str ) -> tuple :
+    def get_coordinate( address: str ) -> tuple or None :
         """
 
         :param address:
         :return:
         """
-        location = GeoAPI.geolocator.geocode(address)
+        location = GeoApi.geo_locator.geocode(address)
+
+        if location is None :
+            return None
+
+        # if this location exists, get coordinate
         coordinate = location.latitude, location.longitude
 
         BotLogger.debug(f"Coordinate Of {address} is {coordinate}")
@@ -27,18 +32,23 @@ class GeoAPI :
 
 
     @staticmethod
-    def get_full_address( address: str ) -> str :
+    def get_full_address( address: str ) -> str or None :
         """
 
-        :param address:
+        :param address: location string
         :return:
         """
-        full_address = GeoAPI.geolocator.geocode(address).address
+        location = GeoApi.geo_locator.geocode(address)
 
+        if location is None :
+            return None
+
+        # if this location exists, get full address string
+        full_address = location.address
         BotLogger.debug(f"Full Address Of {address} is {full_address}")
         return full_address
 
 
 if __name__ == '__main__' :
-    res = GeoAPI.get_full_address("成大資訊新館")
+    res = GeoApi.get_coordinate("資訊新館")
     print(res)

@@ -5,6 +5,7 @@ from pydub import AudioSegment
 
 # project libs
 from botlib import BotConfig
+from botlib.api.geoapi import GeoApi
 from botlib.botlogger import BotLogger
 from botlib.botresponse import BotResponse, BotResponseLanguage
 from botlib.converter.audio_converter import AudioConvert
@@ -15,7 +16,7 @@ from flask import request
 
 # line sdk
 from linebot import LineBotApi, exceptions
-from linebot.models import AudioMessage, AudioSendMessage, TextSendMessage
+from linebot.models import AudioMessage, AudioSendMessage, TextSendMessage, LocationMessage
 
 
 
@@ -23,21 +24,6 @@ class LineApi :
     """
     Simplified LineAPIs
     """
-
-
-    @staticmethod
-    def send_text( channel_token, reply_token, msg: str ) -> None :
-        """
-        Simplified TextSendMessage Line api
-        
-        :param channel_token: line bot channel token
-        :param reply_token: reply token
-        :param msg: text message
-        :return: None
-        """
-        api = LineBotApi(channel_access_token = channel_token)
-        api.reply_message(reply_token, TextSendMessage(text = msg))
-        BotLogger.info(f"Successfully Send Text Message : {msg}")
 
 
     @staticmethod
@@ -124,6 +110,52 @@ class LineApi :
 
 
     @staticmethod
+    def try_push_location( userid, channel_token, location: str or None ) -> None :
+        """
+        Try To Push A LocationMessage
+
+        if 'location' is :
+            - None : do nothing
+            - not str : TypeError, do nothing except for Logging
+            - str : send a location message if 'address' and 'coordinate' both found
+
+        :param userid: target user id
+        :param channel_token: bot channel token
+        :param location: target location string
+        :return: None
+        """
+
+        try :
+            # check location type
+            if location is None :
+                return
+
+            if type(location) is not str :
+                raise TypeError("Location Should Be A String.")
+
+            # get address adn coordinate of this location
+            address = GeoApi.get_full_address(location)
+            coordinate = GeoApi.get_coordinate(location)
+
+            # check coordinate value
+            if coordinate or address is None :
+                raise ValueError(f"Cannot Find Address or Coordinate Of Location : {location}")
+
+            # if coordinate found, send location msg
+            api = LineBotApi(channel_access_token = channel_token)
+            loc_msg = LocationMessage(title = location, address = address, latitude = coordinate[0], longitude = coordinate[1])
+            api.push_message(to = userid, messages = loc_msg)
+
+            BotLogger.info(f"LocationMessage of ({location}) Sent.")
+
+        except (TypeError, ValueError) as e :
+            BotLogger.exception(e.__str__())
+
+        except Exception as e :
+            BotLogger.exception(f"{type(e).__name__} : {e}")
+
+
+    @staticmethod
     def make_audio_message_and_send( channel_token, reply_token, userid: str, msg: str, language: BotResponseLanguage ) -> None :
         """
         Send a Audio Message Made By msg TTS To User
@@ -164,6 +196,8 @@ class LineApi :
             LineApi.make_audio_message_and_send(channel_token, reply_token, userid, response.text, response.language)
 
         elif response.type == BotResponse.ACTIVITY :
+            # make a location message
+            LineApi.try_push_location(userid, channel_token, response.location)
             LineApi.make_audio_message_and_send(channel_token, reply_token, userid, response.text, response.language)
 
         else :
