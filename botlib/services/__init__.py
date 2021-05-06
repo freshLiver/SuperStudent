@@ -7,6 +7,7 @@ if TYPE_CHECKING :
 from enum import Enum
 
 # project libs
+from botlib.api.hanlpapi import HanlpApi
 from botlib.botlogger import BotLogger
 from botlib.services import news, activity
 from botlib.botresponse import BotResponse
@@ -52,12 +53,12 @@ def match_service( analyzer: 'SemanticAnalyzer' ) -> BotResponse or None :
 
         result = activity.search_activity(analyzer.keywords, analyzer.time_range)
 
-        # TODO : get main location from result text using hanlp
-        location = None
 
         if result is None :
             return BotResponse.make_inform_response("找不到活動", analyzer.response_language)
         else :
+            # get main location from result text using hanlp api
+            location = HanlpApi.extract_location(result)
             return BotResponse.make_activity_response(result, location, analyzer.response_language)
 
     elif analyzer.service == Services.CREATE_ACTIVITY :

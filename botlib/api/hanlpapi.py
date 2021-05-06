@@ -308,16 +308,53 @@ class HanlpApi :
             return result
 
 
+    @staticmethod
+    def extract_location( sentence: str ) -> str or None :
+        """
+        利用 WS, POS, NER 結果找出 sentence 中包含的 location token
+        若無 location token 則會將 organization token 加入考慮
+
+        :param sentence: any sentence
+        :return: 最長的 location token
+        """
+
+        if sentence is not None :
+
+            # do ws, pos, ner on this sentence
+            ws_pos_ner = HanlpApi.parse_sentence(sentence)
+            classification = HanlpApi.classify_common_words(ws_pos_ner["NER"])
+
+            locations = classification[NerCatalogs.LOCATION.value]
+
+            # if no location found, also include org
+            if locations == [] :
+                locations += classification[NerCatalogs.ORGANIZATION.value]
+
+            # return longest location token ( sort and return first match )
+            locations.sort(key = len)
+            for location in locations :
+                return location
+
+        # sentence is none or location not found
+        return None
+
+
 if __name__ == '__main__' :
     HanlpApi.URL = BotConfig.HANLP_TEST_URL
     sentences = ["2018年4點10分中", "如果一個網站可以提供比較快速的台積電網路服務", "今天中國時報關於盧文祥的新聞"]
 
+    # extract location
+    location = HanlpApi.extract_location("成功大學資訊新館")
+
+    # parse sentence (ws, pos, ner)
     ws_pos_ner_list = HanlpApi.parse_sentences(sentences, { })
     ws_pos_ner = HanlpApi.parse_sentence(sentences[1], { })
 
+    # extract keywords base on ws, pos result
     keywords_list = HanlpApi.extract_keywords_of_sentences(ws_pos_ner_list["WS"], ws_pos_ner_list["POS"])
     keywords = HanlpApi.extract_keywords(ws_pos_ner["WS"], ws_pos_ner["POS"])
 
+    # classify common ner type base on ner result
     classification_list = HanlpApi.classify_common_words_of_sentences(ws_pos_ner_list["NER"])
     classification = HanlpApi.classify_common_words(ws_pos_ner["NER"])
 
