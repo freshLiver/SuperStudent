@@ -140,7 +140,11 @@ class LineApi :
             # check coordinate value
             if coordinate is None or address is None :
                 raise ValueError(f"Cannot Find Address or Coordinate Of Location : {location}")
-            BotLogger.info(f"Find Address : {address} at {coordinate}")
+
+            log = f"Find {location} Address And Coordinate : \n\t"
+            log += f"Full Address : {address}\n\t"
+            log += f"Coordinate : {coordinate}\n"
+            BotLogger.info(log)
 
             # if coordinate found, send location msg
             api = LineBotApi(channel_access_token = channel_token)
@@ -215,7 +219,7 @@ class LineApi :
         """
         save audio message as wav file to audio input tmp dir
         and this audio message will be named after {userid}{postfix}
-        
+
         :param userid: line user id
         :param audio_message: audio message received from user
         :param line_bot_api: line bot api create in app.py
