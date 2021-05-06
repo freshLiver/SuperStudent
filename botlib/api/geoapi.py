@@ -50,5 +50,11 @@ class GeoApi :
 
 
 if __name__ == '__main__' :
-    res = GeoApi.get_coordinate("資訊新館")
-    print(res)
+
+    location = "成功大學"
+
+    address = GeoApi.get_full_address(location)
+    coordinate = GeoApi.get_coordinate(location)
+
+    print(address)
+    print(coordinate)
