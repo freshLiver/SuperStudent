@@ -138,8 +138,9 @@ class LineApi :
             coordinate = GeoApi.get_coordinate(location)
 
             # check coordinate value
-            if coordinate or address is None :
+            if coordinate is None or address is None :
                 raise ValueError(f"Cannot Find Address or Coordinate Of Location : {location}")
+            BotLogger.info(f"Find Address : {address} at {coordinate}")
 
             # if coordinate found, send location msg
             api = LineBotApi(channel_access_token = channel_token)
@@ -152,7 +153,7 @@ class LineApi :
             BotLogger.exception(e.__str__())
 
         except Exception as e :
-            BotLogger.exception(f"{type(e).__name__} : {e}")
+            BotLogger.exception(f"{type(e).__name__} : \n{e}")
 
 
     @staticmethod
