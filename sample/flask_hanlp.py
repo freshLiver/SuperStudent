@@ -1,20 +1,23 @@
+import os
 import json
 import hanlp
 
-# flask libs
-from flask import Flask, request, jsonify
-
-# proj libs
-from botlib import BotConfig
+from flask import abort, Flask, jsonify, request
 
 
 
-HanLP = hanlp.load(hanlp.pretrained.mtl.CLOSE_TOK_POS_NER_SRL_DEP_SDP_CON_ELECTRA_SMALL_ZH)
 app = Flask(__name__)
+HanLP = hanlp.load(hanlp.pretrained.mtl.CLOSE_TOK_POS_NER_SRL_DEP_SDP_CON_ELECTRA_SMALL_ZH)
 
 
-@app.route("/NLP", methods = ["POST"])
-def build_dict() :
+@app.route('/')
+def index() :
+    return 'Flask-HanLP API is running!'
+
+
+@app.route("/HANLP", methods = ["POST"])
+def nlp() :
+    # TODO : ADD LOG FOR THIS
     try :
         # get json content from post request
         try :
@@ -59,10 +62,7 @@ def build_dict() :
         return jsonify(error_msg)
 
 
-@app.route("/", methods = ["GET"])
-def home() :
-    return "Home Page Of BotNLP."
-
-
 if __name__ == '__main__' :
-    app.run(debug = True, port = BotConfig.PORT)
+    # certificate and key files
+    context = ('server.crt', 'server.key')
+    app.run(host = '0.0.0.0', port = 7778, debug = True, ssl_context = context)

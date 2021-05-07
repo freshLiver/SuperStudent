@@ -68,7 +68,7 @@ def match_service( analyzer: 'SemanticAnalyzer' ) -> BotResponse or None :
         ambiguous_loc = (analyzer.locations == [])
 
         if ambiguous_loc :
-            return BotResponse.make_inform_response("地點不明，請補上活動舉辦的地點", analyzer.response_language)
+            return BotResponse.make_inform_response("地點不明，請補上活動舉辦的地點後再說一次", analyzer.response_language)
         else :
             result = activity.create_activity(analyzer.parsed_content, analyzer.time_range)
             return BotResponse.make_inform_response(result, analyzer.response_language)

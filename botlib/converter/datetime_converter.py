@@ -131,7 +131,7 @@ class DatetimeConverter :
             day_text = str((now + relativedelta(days = day_shift)).strftime(date_fmt))
             any_cht_text = any_cht_text.replace(match.group(), f"{day_text}")
 
-        # TODO : 周X、週末、月底、月初
+        # TODO : 周X、週末、月底、月初、昨天、前天
 
         return any_cht_text
 
