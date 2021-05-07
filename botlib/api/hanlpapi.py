@@ -331,7 +331,7 @@ class HanlpApi :
                 locations += classification[NerCatalogs.ORGANIZATION.value]
 
             # return longest location token ( sort and return first match )
-            locations.sort(key = len)
+            locations = sorted(locations, key = len, reverse = True)
             for location in locations :
                 return location
 
@@ -344,7 +344,7 @@ if __name__ == '__main__' :
     sentences = ["2018年4點10分中", "如果一個網站可以提供比較快速的台積電網路服務", "今天中國時報關於盧文祥的新聞"]
 
     # extract location
-    location = HanlpApi.extract_location("成功大學資訊新館")
+    location = HanlpApi.extract_location("桃園國際機場與台北101大樓")
 
     # parse sentence (ws, pos, ner)
     ws_pos_ner_list = HanlpApi.parse_sentences(sentences, { })

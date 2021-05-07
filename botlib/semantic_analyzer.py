@@ -167,7 +167,7 @@ class SemanticAnalyzer :
             self.date = catalogs[NerCatalogs.DATE.value]
             self.time = catalogs[NerCatalogs.TIME.value]
             self.locations = catalogs[NerCatalogs.LOCATION.value]
-            self.locations.sort(key = len)
+            self.locations = sorted(self.locations, key = len, reverse = True)
 
             # generate keyword list from ws, pos, ner results
             self.__extract_keywords(ws_pos_ner)
