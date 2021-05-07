@@ -114,6 +114,6 @@ def home() :
 
 if __name__ == "__main__" :
     # TODO : openssl self-signed certificate
-    # certificate and key files
-    context = ('server.crt', 'server.key')
+    # certificate and key files (root dir)
+    context = ('/server.crt', '/server.key')
     app.run(host = '0.0.0.0', port = BotConfig.PORT, debug = True, ssl_context = context)
