@@ -13,12 +13,13 @@ from botlib.services import match_service
 from botlib.semantic_analyzer import SemanticAnalyzer
 
 # flask libs
-from flask import abort, Flask, jsonify, request, send_from_directory, make_response
+from flask import abort, Flask, request, send_from_directory, make_response
 
 # line bot apis
 from linebot import LineBotApi, WebhookHandler, WebhookParser
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, AudioMessage
+
 
 
 # create global app instance
@@ -113,7 +114,5 @@ def home() :
 
 
 if __name__ == "__main__" :
-    # TODO : openssl self-signed certificate
     # certificate and key files (root dir)
-    context = ('/server.crt', '/server.key')
-    app.run(host = '0.0.0.0', port = BotConfig.PORT, debug = True, ssl_context = context)
+    app.run(host = '0.0.0.0', port = BotConfig.PORT, debug = True)
