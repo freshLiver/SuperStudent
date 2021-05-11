@@ -26,7 +26,7 @@ class Services(Enum) :
 
 def match_service( analyzer: 'SemanticAnalyzer' ) -> BotResponse or None :
     """
-    Choose Service Via Semantic Analyzed Result Info
+    Choose Service By Using Semantic Analyzed Result
     
     :param analyzer: Semantic Analyzer
     :return: request response, return None if Service Matching Error Happened

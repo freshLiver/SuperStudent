@@ -63,6 +63,4 @@ def nlp() :
 
 
 if __name__ == '__main__' :
-    # certificate and key files
-    context = ('server.crt', 'server.key')
-    app.run(host = '0.0.0.0', port = 7778, debug = True, ssl_context = context)
+    app.run(host = '0.0.0.0', port = 7778, debug = True)
