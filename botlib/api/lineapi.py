@@ -27,83 +27,57 @@ class LineApi :
 
 
     @staticmethod
-    def send_audio( channel_token, reply_token, file_path: Path ) -> None :
-        """
-        Simplified AudioSendMessage Line api
-        
-        :param channel_token: line bot channel token
-        :param reply_token: reply token
-        :param file_path: Audio Message Source File Path Obj
-        :return: None
-        """
-
-        try :
-            # get audio file duration
-            audio_duration = AudioSegment.from_file(file_path).duration_seconds * 1000
-
-            # reply audio file (by url) with duration
-            audio_url = path.join(request.host_url, "audio", file_path.name).replace("http://", "https://")
-            api = LineBotApi(channel_access_token = channel_token)
-            api.reply_message(reply_token, AudioSendMessage(audio_url, duration = audio_duration))
-
-            BotLogger.debug(f"Audio Message '{file_path}' Sent.")
-
-        except FileNotFoundError as fe :
-            BotLogger.exception(f"Send Audio Failed, {file_path} FileNotFound : {fe}")
-
-        except TypeError as te :
-            BotLogger.exception(f"Send Audio Failed, {file_path} TypeError : {te}")
-
-        except Exception as e :
-            BotLogger.exception(f"Send Audio Failed, {type(e).__name__} : {e}")
-
-
-    @staticmethod
     def push_text( userid, channel_token, text_msg: str ) -> None :
         """
+        以 push 的方式讓 bot 傳送文字訊息給 userid
+        不同於 reply message, 不需要 reply token 所以沒有 timeout 以及只能 reply 一次的問題
 
-        :param userid:
-        :param channel_token:
-        :param text_msg:
-        :return:
+        :param userid: 使用者聊天室的 id
+        :param channel_token: bot channel token
+        :param text_msg: message text content
+        :return: nothing
         """
 
         try :
             api = LineBotApi(channel_access_token = channel_token)
             api.push_message(userid, TextSendMessage(text = text_msg))
-            BotLogger.debug(f"Text Message '{text_msg}' Pushed.")
+            BotLogger.info(f"Text Message '{text_msg}' Pushed.")
 
         except Exception as e :
             BotLogger.exception(f"Push Audio Failed, {type(e).__name__} : {e}")
 
 
     @staticmethod
-    def push_audio( userid, channel_token, audio_path: Path ) -> None :
+    def push_audio( userid, channel_token, w4a_audio_path: Path ) -> None :
         """
+        以 push 的方式讓 bot 傳送 w4a 音訊訊息給 userid
+        會先將 path 改以 https url 的形式呈現，然後再利用 url 建立音訊訊息傳給 user
 
-        :param userid:
-        :param channel_token:
-        :param audio_path:
-        :return:
+        不同於 reply message, 不需要 reply token 所以沒有 timeout 以及只能 reply 一次的問題
+
+        :param userid: 使用者聊天室的 id
+        :param channel_token: bot channel token
+        :param w4a_audio_path: w4a 音訊檔在本機的路徑
+        :return: nothing
         """
 
         try :
-            api = LineBotApi(channel_access_token = channel_token)
 
             # get audio file duration
-            audio_duration = AudioSegment.from_file(audio_path).duration_seconds * 1000
-            # reply audio file (by url) with duration
-            audio_url = path.join(request.host_url, "audio", audio_path.name).replace("http://", "https://")
+            audio_duration = AudioSegment.from_file(w4a_audio_path).duration_seconds * 1000
 
-            api.push_message(userid, AudioMessage(audio_url, duration = audio_duration))
+            # push audio file (by url) with duration
+            audio_url = path.join(request.host_url, "audio", w4a_audio_path.name).replace("http://", "https://")
 
-            BotLogger.debug(f"Audio Message '{audio_path}' Pushed.")
+            LineBotApi(channel_token).push_message(userid, AudioMessage(audio_url, duration = audio_duration))
+
+            BotLogger.debug(f"Audio Message '{w4a_audio_path}' Pushed.")
 
         except FileNotFoundError as fe :
-            BotLogger.exception(f"Push Audio Failed, {audio_path} FileNotFound : {fe}")
+            BotLogger.exception(f"Push Audio Failed, {w4a_audio_path} FileNotFound : {fe}")
 
         except TypeError as te :
-            BotLogger.exception(f"Push Audio Failed, {audio_path} TypeError : {te}")
+            BotLogger.exception(f"Push Audio Failed, {w4a_audio_path} TypeError : {te}")
 
         except Exception as e :
             BotLogger.exception(f"Push Audio Failed, {type(e).__name__} : {e}")
@@ -161,53 +135,86 @@ class LineApi :
 
 
     @staticmethod
-    def make_audio_message_and_send( channel_token, reply_token, userid: str, msg: str, language: BotResponseLanguage ) -> None :
+    def make_audio_message_and_send( channel_token, userid, msg: str, language: BotResponseLanguage ) -> None :
         """
-        Send a Audio Message Made By msg TTS To User
+        利用 TTS 將文字訊息傳換成對應語言（BotResponseLanguage）
+        然後將產生的 w4a 音訊檔傳送（push）給 user
 
         :param channel_token: line bot channel token
-        :param reply_token: reply token
         :param userid: user line id to determine tmp file name
         :param msg: text message that will be heard by user
         :param language: bot response audio language
         :return: None
         """
 
-        # tts to wav file
-        if language == BotResponseLanguage.CHINESE :
-            wav_tts_path = TextToSpeech.cht_to_chinese(userid, msg)
-        else :
-            wav_tts_path = TextToSpeech.cht_to_taiwanese(userid, msg)
-
-        # convert wav tts audio to m4a audio
-        m4a_response_file_path = AudioConvert.wav_to_m4a(wav_tts_path)
-
-        # reply this audio message
         try :
-            LineApi.send_audio(channel_token, reply_token, m4a_response_file_path)
-        except exceptions.LineBotApiError :
-            LineApi.push_audio(userid, channel_token, m4a_response_file_path)
+            # tts to wav file
+            if language == BotResponseLanguage.CHINESE :
+                wav_tts_path = TextToSpeech.cht_to_chinese(userid, msg)
+            else :
+                wav_tts_path = TextToSpeech.cht_to_taiwanese(userid, msg)
 
-        BotLogger.info(f"Send Text {msg} \nAs Audio File : {m4a_response_file_path}")
+            # convert wav tts audio to m4a audio
+            m4a_response_file_path = AudioConvert.wav_to_m4a(wav_tts_path)
+
+            # reply this audio message
+            LineApi.push_audio(userid, channel_token, m4a_response_file_path)
+            BotLogger.info(f"Send Text {msg} \nAs Audio File : {m4a_response_file_path}")
+
+        except Exception as e :
+            BotLogger.exception(f"{type(e).__name__} Happened When Sending Audio Message.\n\t => {e}")
 
 
     @staticmethod
-    def send_response( userid, channel_token, reply_token, response: BotResponse ) -> None :
+    def send_response( userid, channel_token, response: BotResponse ) -> None :
+        """
+        依據 BotResponse 中設定的 response type 傳送（push）不同的回覆給 user
+
+        :param userid: target user id
+        :param channel_token: bot channel token
+        :param response: BotResponse instance
+        :return: nothing
+        """
+
+        # INFORM 類訊息，通常是用來傳送錯誤訊息
         if response.type == BotResponse.INFORM :
             LineApi.push_text(userid, channel_token, response.text)
 
+        # NEWS 類訊息，來回覆使用者查詢新聞的結果
         elif response.type == BotResponse.NEWS :
-            LineApi.push_text(userid, channel_token, response.url)
-            LineApi.make_audio_message_and_send(channel_token, reply_token, userid, response.text, response.language)
 
+            # response 可能會有多則以 newline 區隔的新聞，所以需要先進行切割再分別發送
+            links, texts = response.url.split('\n'), response.text.split('\n')
+            n_links, n_texts = len(links), len(texts)
+
+            # 檢查網址數量是否與標題數量相符
+            if n_links != n_texts :
+                msg = "News Response Warning, links and texts have diff size.\n"
+                msg += f"\t links size = {n_links}, texts size = {n_texts}"
+                BotLogger.warning(msg)
+
+            # 網址數量與標題數量可能不同，必須以少量較少的作為訊息數量依據
+            for i in range(min(n_links, n_texts)) :
+                link, text = links[i], texts[i]
+
+                # text and url should not be empty str
+                if link == '' or text == '' :
+                    continue
+
+                # send news title and audio
+                LineApi.push_text(userid, channel_token, links[i])
+                LineApi.make_audio_message_and_send(channel_token, userid, texts[i], response.language)
+
+        # ACTIVITY 類訊息，通常是查詢活動的結果，包含活動位置等資訊
         elif response.type == BotResponse.ACTIVITY :
             # make a location message
             LineApi.try_push_location(userid, channel_token, response.location)
-            LineApi.make_audio_message_and_send(channel_token, reply_token, userid, response.text, response.language)
+            LineApi.make_audio_message_and_send(channel_token, userid, response.text, response.language)
 
         else :
-            BotLogger.error("Error Response Type")
+            BotLogger.error("Error Response Type, Should Not Be Here.")
 
+        # 將回覆內容格式化輸出作為 log
         BotLogger.info(f"send response : {response.__str__()}")
 
 
