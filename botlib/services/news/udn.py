@@ -2,6 +2,8 @@ import requests as rq
 from bs4 import BeautifulSoup
 import re
 import datetime
+from selenium import webdriver
+import time
 
 html_list = []
 title_list = []
@@ -10,38 +12,65 @@ date_list = []
 
 
 def parse(keyword: list, ty: (datetime, datetime)):
+    if_no_url = "NO_URL"
+    if_no_context = "找不到相符結果"
+    search_string = "https://udn.com/search/word/2/"
+    if keyword:
+        for ele in keyword:
+            search_string = search_string + ele
+            if ele != keyword[-1]:
+                search_string = search_string + "%20"
+        # open chrome
+        chrome = webdriver.Chrome("./chromedriver.exe")
+        chrome.get(search_string)
+        chrome.fullscreen_window()
+        for x in range(1, 6):
+            chrome.execute_script("window.scrollTo(0,document.body.scrollHeight)")
+            time.sleep(0.5)
+        # get soup
+        soup = BeautifulSoup(chrome.page_source, 'html.parser')
+        # check result
+        sel = soup.find("div", "search-total")
+        sel = sel.find("span").text
 
-    url = "https://udn.com/rank/pv/2"
-    response = rq.get(url)
-    soup = BeautifulSoup(response.text, 'html.parser')
-    sel = soup.select("div.story-list__text h2 a")
-    for ele in sel:
-        html_list.append(ele["href"])
-    for link in html_list:
-        url = link
+        if sel != "0":
+            sel = soup.select("div.story-list__text h2 a")
+            for ele in sel:
+                html_list.append(ele["href"])
+            sel = soup.select("time.story-list__time")
+            for ele in sel:
+                date = ele.text
+                date_list.append(date[:10]+" 00:00")
+            sel = soup.select("div.story-list__text p")
+            for ele in sel:
+                content_list.append(ele.text)
+            if_no_url = html_list[0]
+            if_no_context = content_list[0]
+            for i in range(0, len(html_list)):
+                date = datetime.datetime.strptime(str(date_list[i]), '%Y-%m-%d %H:%M')
+                if ty[0] <= date <= ty[1]:
+                    content_list[i] = re.sub('[a-zA-Z]', '', content_list[i])
+                    return [html_list[i], content_list[i].replace(u'\u3000', u' ').replace('\n', '')]
+        chrome.close()
+
+    else:
+        html_string = ""
+        content_string = ""
+        url = "https://udn.com/rank/pv/2"
         response = rq.get(url)
         soup = BeautifulSoup(response.text, 'html.parser')
+        sel = soup.select("div.story-list__text h2 a", limit=3)
+        for ele in sel:
+            html_string += ele["href"]
+            if ele != sel[-1]:
+                html_string += "\n"
+        sel = soup.select("div.story-list__text p", limit=3)
+        for ele in sel:
+            content_string += ele.text.replace(u'\u3000', u' ').replace('\n', '')
+            if ele != sel[-1]:
+                content_string += "\n"
+        content_string = re.sub('[a-zA-Z]', '', content_string)
+        return [html_string, content_string]
+    return [if_no_url, if_no_context]
 
-        # get title
-        s = soup.find("h1", "article-content__title").text
-        title_list.append(s)
-
-        # get date
-        s = soup.find("time", "article-content__time").text
-        date = datetime.datetime.strptime(s, '%Y-%m-%d %H:%M')
-        if ty[0] < date < ty[1]:
-            # get content
-            text_list = soup.find("section", "article-content__editor").select("p")
-            text = "".join(t.text.replace("\r", "").replace("\n", "").replace('</p>', '').replace('<p>', '') for t in text_list)
-            text = re.sub('[a-zA-Z]', '', text)
-            if match(text,keyword):
-                return [link, text[:30]]
-    return ["NO_URL", "找不到相符結果"]
-
-def match(content: str, keyword: list):
-
-    for key in keyword:
-        if key not in content:
-            return False
-    return True
 
