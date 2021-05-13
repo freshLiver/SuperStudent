@@ -14,22 +14,22 @@ class TextToSpeech :
 
 
     @staticmethod
-    def cht_to_taiwanese( userid: str, chinese_text: str ) -> Path :
+    def cht_to_taiwanese( audio_name: str, cht_text: str ) -> Path :
         """
 
-        :param userid:
-        :param chinese_text:
+        :param audio_name:
+        :param cht_text:
         :return:
         """
 
-        return LabApi.lab_c2t_api(userid, chinese_text)
+        return LabApi.lab_c2t_api(audio_name, cht_text)
 
 
     @staticmethod
-    def cht_to_chinese( userid: str, cht_text: str ) -> Path :
+    def cht_to_chinese( audio_name: str, cht_text: str ) -> Path :
         try :
             # Determine output audio path
-            output_path = BotConfig.file_path_from(BotConfig.AUDIO_OUTPUT_TMP_DIR, userid, ".wav")
+            output_path = BotConfig.file_path_from(BotConfig.AUDIO_OUTPUT_TMP_DIR, audio_name, ".wav")
 
             # Convert Cht Text to Chinese Speech
             gtts.gTTS(cht_text, lang = 'zh').save(output_path.__str__())

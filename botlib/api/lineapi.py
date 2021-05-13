@@ -167,7 +167,7 @@ class LineApi :
 
 
     @staticmethod
-    def make_audio_message_and_send( channel_token, userid, reply_token, msg: str, language: BotResponseLanguage ) -> None :
+    def make_audio_message( channel_token, userid, reply_token, msg: str, language: BotResponseLanguage, seq = 0 ) -> None :
         """
         利用 TTS 將文字訊息傳換成對應語言（BotResponseLanguage）
         然後將產生的 w4a 音訊檔傳送（push）給 user
@@ -177,16 +177,17 @@ class LineApi :
         :param reply_token: token for replying specific message
         :param msg: text message that will be heard by user
         :param language: bot response audio language
-        :param postfix: postfix of audio file
+        :param seq: audio message sequence number
         :return: None
         """
 
         try :
             # tts to wav file
+            filename = f"{userid}_{seq}"
             if language == BotResponseLanguage.CHINESE :
-                wav_tts_path = TextToSpeech.cht_to_chinese(userid, msg)
+                wav_tts_path = TextToSpeech.cht_to_chinese(audio_name = filename, cht_text = msg)
             else :
-                wav_tts_path = TextToSpeech.cht_to_taiwanese(userid, msg)
+                wav_tts_path = TextToSpeech.cht_to_taiwanese(audio_name = filename, cht_text = msg)
 
             # convert wav tts audio to m4a audio
             m4a_response_file_path = AudioConvert.wav_to_m4a(wav_tts_path)
@@ -231,19 +232,17 @@ class LineApi :
                 msg += f"\t links size = {links.__len__()}, texts size = {texts.__len__()}"
                 BotLogger.warning(msg)
 
-            # 網址數量與標題數量可能不同，必須以少量較少的作為訊息數量依據
+            # 網址以一個文字訊息傳送，內容則分成多個音訊傳送
             LineApi.push_text(userid, channel_token, response.url)
-            LineApi.make_audio_message_and_send(channel_token, userid, reply_token, response.text, response.language)
-            # for (text, link) in zip(texts, links) :
-            #     # send news title and audio
-            #     LineApi.push_text(userid, channel_token, link)
-            #     LineApi.make_audio_message_and_send(channel_token, userid, reply_token, text + "...", response.language)
+            # LineApi.make_audio_message(channel_token, userid, reply_token, response.text, response.language)
+            for i, text in enumerate(texts) :
+                LineApi.make_audio_message(channel_token, userid, reply_token, text, response.language, i)
 
         # ACTIVITY 類訊息，通常是查詢活動的結果，包含活動位置等資訊
         elif response.type == BotResponse.ACTIVITY :
             # make a location message
             LineApi.try_push_location(userid, channel_token, response.location)
-            LineApi.make_audio_message_and_send(channel_token, userid, reply_token, response.text, response.language)
+            LineApi.make_audio_message(channel_token, userid, reply_token, response.text, response.language)
 
         else :
             BotLogger.error("Error Response Type, Should Not Be Here.")
