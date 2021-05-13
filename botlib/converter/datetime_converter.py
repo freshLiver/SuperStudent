@@ -37,17 +37,17 @@ class DatetimeConverter :
     __CHT_DATETIME_FMT += f"({__CHT_NUMBER_FMT}個?{__WEEK___UNIT_FMT})?[又]?"
     __CHT_DATETIME_FMT += f"({__CHT_NUMBER_FMT}個?{__DATE___UNIT_FMT})?[又]?"
     __CHT_DATETIME_FMT += f"({__CHT_NUMBER_FMT}個?{__HOUR___UNIT_FMT})?[又]?"
-    __CHT_DATETIME_FMT += f"({__CHT_NUMBER_FMT}個?{__MINUTE_UNIT_FMT})?(之?後)?"
+    __CHT_DATETIME_FMT += f"({__CHT_NUMBER_FMT}個?{__MINUTE_UNIT_FMT})?(之?前|後)?"
     __CHT_DATETIME_RULE = re.compile(__CHT_DATETIME_FMT)
 
     __ARABIC_NUMBER_FMT = "\d+"
     __ARABIC_NUMBER_RULE = re.compile(__ARABIC_NUMBER_FMT)
-    __ARABIC_YEAR___RULE = re.compile(f"{__ARABIC_NUMBER_FMT}{__YEAR___UNIT_FMT}")
-    __ARABIC_MONTH__RULE = re.compile(f"{__ARABIC_NUMBER_FMT}{__MONTH__UNIT_FMT}")
-    __ARABIC_WEEK___RULE = re.compile(f"{__ARABIC_NUMBER_FMT}{__WEEK___UNIT_FMT}")
-    __ARABIC_DATE___RULE = re.compile(f"{__ARABIC_NUMBER_FMT}{__DATE___UNIT_FMT}")
-    __ARABIC_HOUR___RULE = re.compile(f"{__ARABIC_NUMBER_FMT}{__HOUR___UNIT_FMT}")
-    __ARABIC_MINUTE_RULE = re.compile(f"{__ARABIC_NUMBER_FMT}{__MINUTE_UNIT_FMT}")
+    __ARABIC_YEAR___RULE = re.compile(f"{__ARABIC_NUMBER_FMT}個?{__YEAR___UNIT_FMT}")
+    __ARABIC_MONTH__RULE = re.compile(f"{__ARABIC_NUMBER_FMT}個?{__MONTH__UNIT_FMT}")
+    __ARABIC_WEEK___RULE = re.compile(f"{__ARABIC_NUMBER_FMT}個?{__WEEK___UNIT_FMT}")
+    __ARABIC_DATE___RULE = re.compile(f"{__ARABIC_NUMBER_FMT}個?{__DATE___UNIT_FMT}")
+    __ARABIC_HOUR___RULE = re.compile(f"{__ARABIC_NUMBER_FMT}個?{__HOUR___UNIT_FMT}")
+    __ARABIC_MINUTE_RULE = re.compile(f"{__ARABIC_NUMBER_FMT}個?{__MINUTE_UNIT_FMT}")
 
     __ARABIC_DATETIME_FMT = f"({__ARABIC_NUMBER_FMT}個?{__YEAR___UNIT_FMT})?[又]?"
     __ARABIC_DATETIME_FMT += f"({__ARABIC_NUMBER_FMT}個?{__MONTH__UNIT_FMT})?[又]?"
@@ -57,8 +57,8 @@ class DatetimeConverter :
     __ARABIC_DATETIME_FMT += f"({__ARABIC_NUMBER_FMT}個?{__MINUTE_UNIT_FMT})?"
     __ARABIC_DATETIME_RULE = re.compile(__ARABIC_DATETIME_FMT)
 
-    __ARABIC_FUTURE_DATETIME_FMT = __ARABIC_DATETIME_FMT + f"之?後"
-    __ARABIC_FUTURE_DATETIME_RULE = re.compile(__ARABIC_FUTURE_DATETIME_FMT)
+    __ARABIC_FUTURE_DATETIME_RULE = re.compile(__ARABIC_DATETIME_FMT + "之?後")
+    __ARABIC_PAST_DATETIME_RULE = re.compile(__ARABIC_DATETIME_FMT + "之?前")
 
     __ARABIC_DATETIME_RANGE_FMT = f"從?{__ARABIC_DATETIME_FMT}(到{__ARABIC_DATETIME_FMT})?"
     __ARABIC_DATETIME_RANGE_RULE = re.compile(__ARABIC_DATETIME_RANGE_FMT)
@@ -205,14 +205,13 @@ class DatetimeConverter :
 
 
     @staticmethod
-    def to_datetime( std_arabic_value_datetime_text: str, from_now = False ) -> datetime or None :
+    def to_datetime( std_arabic_value_datetime_text: str, from_now = False, is_past = False ) -> datetime or None :
         """
-        TODO : comment for code
         將「以阿拉伯數值表示的 年月日時分 字串」轉換成 datetime instance
-        convert absolute datetime text with arabic numeral values to datetime instance
 
         :param std_arabic_value_datetime_text: 以「以阿拉伯數值表示的 年月日時分 字串」
         :param from_now: 是否以當前時間為基準進行抽取，預設為 false
+        :param is_past: 以當前時間作為基準「往過去」計算時間，預設為「往未來」找
         :return: 「第一個」符合條件的 datetime instance，若沒有則回傳 None
         """
 
@@ -265,8 +264,8 @@ class DatetimeConverter :
             delta_time += relativedelta(minutes = minutes)
 
         now = datetime.datetime.now()
-        if from_now is True :
-            return now + delta_time
+        if from_now == True :
+            return now + (-1 if is_past else +1) * delta_time
         else :
             predict = False
             if years != -1 :
@@ -299,35 +298,47 @@ class DatetimeConverter :
 
 
     @staticmethod
-    def get_std_future_datetime_text( future_arabic_value_datetime_text: str ) -> str :
+    def get_real_datetime_text( arabic_value_datetime_text: str ) -> str :
         """
-        以「阿拉伯數值」表示的「未來的相對時間（例如：1個月3天5小時後）」的字串轉成 年月日時分 表示（以當前時間作為基準）
+        以「阿拉伯數值」表示的「相對時間（例如：1個月3天5小時後、2天前）」的字串轉成 年月日時分 表示（以當前時間作為基準）
         
-        :param future_arabic_value_datetime_text: 以「阿拉伯數值」表示的「未來的相對時間」的字串
+        :param arabic_value_datetime_text: 以「阿拉伯數值」表示的「相對時間」的字串
         :return: 基於當前時間，以「年月日時分」表示的時間字串
         """
 
-        # TODO : maybe also past datetime?
-
-        # 找出符合條件的子字串
-        search_result = DatetimeConverter.__ARABIC_FUTURE_DATETIME_RULE.search(future_arabic_value_datetime_text)
+        # 找出時間字串
+        past_matches = DatetimeConverter.__ARABIC_PAST_DATETIME_RULE.finditer(arabic_value_datetime_text)
+        future_matches = DatetimeConverter.__ARABIC_FUTURE_DATETIME_RULE.finditer(arabic_value_datetime_text)
 
         # 如果沒有符合條件的字串就回傳原字串
-        if search_result is None :
-            return future_arabic_value_datetime_text
+        if past_matches == future_matches is None :
+            return arabic_value_datetime_text
 
-        # 若有找到相符的子字串就一一進行
+        # 處理所有時間字串
         else :
-            # 找出相符字串並且刪除多餘字
-            match_text = search_result.group()
-            match_text_clean = match_text.replace("個", "").replace("又", "")
+            result = arabic_value_datetime_text
 
-            # 將未來時間用實際時間進行替換（利用「抽取時間」找出時間，並以當前時間為基準計算出未來時間）
-            final_datetime = DatetimeConverter.to_datetime(match_text_clean, from_now = True)
+            # 找出所有相符字串並以長度進行排序
+            past_texts = [past_match.group(0) for past_match in past_matches]
+            past_texts.sort(key = len, reverse = True)
+            future_texts = [future_match.group(0) for future_match in future_matches]
+            future_texts.sort(key = len, reverse = True)
 
-            # 用「計算出的實際時間（並進行格式化）」取代原字串
-            formatted_final_datetime = final_datetime.strftime(DatetimeConverter.__STD_DATETIME_FMT)
-            return future_arabic_value_datetime_text.replace(match_text, formatted_final_datetime)
+            # 處理所有過去字串
+            for past_text in past_texts :
+                clean_past_text = past_text.replace("個", "").replace("又", "")
+                real_datetime = DatetimeConverter.to_datetime(clean_past_text, from_now = True, is_past = True)
+                formatted_real_datetime = real_datetime.strftime(DatetimeConverter.__STD_DATETIME_FMT)
+                result = result.replace(past_text, formatted_real_datetime)
+
+            # 處理所有未來字串
+            for future_text in future_texts :
+                clean_future_text = future_text.replace("個", "").replace("又", "")
+                real_datetime = DatetimeConverter.to_datetime(clean_future_text, from_now = True)
+                formatted_real_datetime = real_datetime.strftime(DatetimeConverter.__STD_DATETIME_FMT)
+                result = result.replace(future_text, formatted_real_datetime)
+
+            return result
 
 
     @staticmethod
@@ -345,20 +356,20 @@ class DatetimeConverter :
         # 將中文時間數值轉成阿拉伯數值
 
         # 抓出「數值為中文」的 datetime substring
-        match_iter = DatetimeConverter.__CHT_DATETIME_RULE.finditer(any_cht_sentence)
-        non_empty_matches = { }
-        for matches in match_iter :
-            match_text = matches.group()
+        cht_datetime_matches = DatetimeConverter.__CHT_DATETIME_RULE.finditer(any_cht_sentence)
+        datetime_dict = { }
+        for cht_datetime_match in cht_datetime_matches :
+            match_text = cht_datetime_match.group()
             # 只要有任何「數值為中文的 datetime substring」就建立字典（原時間字串：處理後的時間字串）
-            if match_text != '' :
-                non_empty_matches[match_text] = ""
+            if re.search('[一二三四五六七八九十]', match_text) is not None :
+                datetime_dict[match_text] = ""
 
         # 如果沒有任何「數值為中文的 datetime substring」就直接回傳原字串
-        if non_empty_matches == { } :
+        if datetime_dict == { } :
             return any_cht_sentence
 
         # 若有任何「數值為中文的 datetime substring」的話就分別進行轉換（轉成以阿拉伯數字表示的 datetime substring）
-        for match in non_empty_matches :
+        for match in datetime_dict :
             # 先簡化「datetime substring 中的中文數值」，以便轉化成阿拉伯數字（例如：五十二 -> 五二）
             tmp = DatetimeConverter.simplify_cht_numeral_representations(match)
 
@@ -366,16 +377,17 @@ class DatetimeConverter :
             tmp = DatetimeConverter.cht_to_arabic_numerals(tmp)
 
             # 刪除多餘字，並且將處理後的結果存到原字串的字典（原字串：處理後的結果）
-            non_empty_matches[match] = tmp.replace("又", "").replace("個", "")
+            datetime_dict[match] = tmp.replace("又", "").replace("個", "")
 
-        # 將「阿拉伯數值化後的『相對未來時間的字串』」轉換成絕對時間（例如：1 天後 -> 3月3日，假設今天為三月二號）
-        for match in (future_matches for future_matches in non_empty_matches if "後" in future_matches) :
-            non_empty_matches[match] = DatetimeConverter.get_std_future_datetime_text(non_empty_matches[match])
+        # 將「相對時間（阿拉伯數值）的字串」轉換成絕對時間（例如：1 天後 -> 3月3日, 1 天前 -> 3月1日，假設今天為三月二號）
+        # 非相對時間的則會直接回傳原字串
+        for datetime_text in datetime_dict :
+            datetime_dict[datetime_text] = DatetimeConverter.get_real_datetime_text(datetime_dict[datetime_text])
 
         # 利用建立的字典（原時間字串：處理後的時間字串）替換掉原句的中文時間字串
         result = any_cht_sentence
-        for match in non_empty_matches :
-            result = result.replace(match, f" {non_empty_matches[match]} ")
+        for match in datetime_dict :
+            result = result.replace(match, f"{datetime_dict[match]}")
 
         # 回傳處理後的字串
         return result
@@ -395,23 +407,23 @@ class DatetimeConverter :
         :return: 抽取出的（起始時間,結束時間）的 tuple，如果沒找到則會回傳當天時間（00:00 ~ 23:59）
         """
 
-        # 將原字串轉換成以「年月日時分」表示的時間字串
-        abs_sentence = DatetimeConverter.standardize_datetime(any_text)
+        # 轉換成以「年月日時分（阿拉伯數值）」表示的時間字串
+        clean_any_text = re.sub("[\r\n\t ]", "", any_text)
+        std_datetime_sentence = DatetimeConverter.standardize_datetime(clean_any_text)
 
-        # 移除多餘的字，並找出「以中文數值表示的時間字串」
-        clean_abs_sentence = re.sub("[\r\n\t ]", "", abs_sentence)
-        matches_iter = DatetimeConverter.__ARABIC_DATETIME_RANGE_RULE.finditer(clean_abs_sentence)
-        non_empty_matches = [match_iter.group() for match_iter in matches_iter if match_iter.group() != '']
+        # 移除多餘的字，並找出所有以「阿拉伯數值」表示的時間字串
+        std_datetime_matches = DatetimeConverter.__ARABIC_DATETIME_RANGE_RULE.finditer(std_datetime_sentence)
+        std_datetime_texts = [match.group() for match in std_datetime_matches if match.group() != '']
 
         # 如果沒有找到符合的時間字串就還傳今天時間（00:00 ~ 23:59）作為預設
-        if non_empty_matches == [] :
+        if std_datetime_texts == [] :
             today_begin = datetime.datetime.combine(datetime.date.today(), datetime.time())
             today_finish = today_begin + datetime.timedelta(days = 1, minutes = -1)
             return today_begin, today_finish
 
         # 有任何符合的時間字串就進行抽取
         else :
-            match = non_empty_matches[0]
+            match = std_datetime_texts[0]
 
             # 如果有找到時間範圍（時間1 到 時間2）就回傳找到的範圍
             if "到" in match :
@@ -431,6 +443,6 @@ if __name__ == '__main__' :
 
     # print(res)
     # res = DatetimeConverter.abs_future_time(res)
-    text = "我想知道下下個月有什麼活動"
+    text = "七十七分鐘前"
     res = DatetimeConverter.extract_datetime(text)
     print(res)
