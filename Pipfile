@@ -13,6 +13,7 @@ python-dateutil = "*"
 bs4 = "*"
 requests = "*"
 geopy = "*"
+selenium = "*"
 
 [dev-packages]
 

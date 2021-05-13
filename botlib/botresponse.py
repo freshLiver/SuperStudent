@@ -15,18 +15,25 @@ class BotResponse :
 
 
     def __init__( self, language: BotResponseLanguage ) :
-        self.url = None
-        self.text = None
-        self.location = None
+        self.url = ''
+        self.text = ''
+        self.location = ''
         self.language = language
         self.type = BotResponse.INFORM
 
 
     def __str__( self ) -> str :
+
+        formatted_links = formatted_texts = ""
+        for text in [text for text in self.text.split('\n') if text != ''] :
+            formatted_texts += f"\t * {text}\n"
+        for link in [link for link in self.url.split('\n') if link != ''] :
+            formatted_links += f"\t * {link}\n"
+
         msg = ""
         msg += f"Type : {self.type}\n"
-        msg += f"Text : {self.text}\n"
-        msg += f"Link : {self.url}\n"
+        msg += f"Text : \n{formatted_texts}"
+        msg += f"Link : \n{formatted_links}"
         msg += f"Loc  : {self.location}\n"
         msg += f"Lang : {self.language.value}\n"
         return msg

@@ -184,26 +184,19 @@ class LineApi :
         elif response.type == BotResponse.NEWS :
 
             # response 可能會有多則以 newline 區隔的新聞，所以需要先進行切割再分別發送
-            links, texts = response.url.split('\n'), response.text.split('\n')
-            n_links, n_texts = len(links), len(texts)
+            links = [link for link in response.url.split('\n') if link != '']
+            texts = [text for text in response.text.split('\n') if text != '']
 
-            # 檢查網址數量是否與標題數量相符
-            if n_links != n_texts :
+            if len(links) != len(texts) :
                 msg = "News Response Warning, links and texts have diff size.\n"
-                msg += f"\t links size = {n_links}, texts size = {n_texts}"
+                msg += f"\t links size = {links.__len__()}, texts size = {texts.__len__()}"
                 BotLogger.warning(msg)
 
             # 網址數量與標題數量可能不同，必須以少量較少的作為訊息數量依據
-            for i in range(min(n_links, n_texts)) :
-                link, text = links[i], texts[i]
-
-                # text and url should not be empty str
-                if link == '' or text == '' :
-                    continue
-
+            for (text, link) in zip(texts, links) :
                 # send news title and audio
-                LineApi.push_text(userid, channel_token, links[i])
-                LineApi.make_audio_message_and_send(channel_token, userid, texts[i], response.language)
+                LineApi.push_text(userid, channel_token, link)
+                LineApi.make_audio_message_and_send(channel_token, userid, text + "...", response.language)
 
         # ACTIVITY 類訊息，通常是查詢活動的結果，包含活動位置等資訊
         elif response.type == BotResponse.ACTIVITY :

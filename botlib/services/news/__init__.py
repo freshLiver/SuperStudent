@@ -4,6 +4,7 @@ import datetime
 # project libs
 from botlib import BotConfig
 from botlib.botlogger import BotLogger
+from botlib.converter.datetime_converter import DatetimeConverter
 
 # import crawler
 from botlib.services.news import udn, chinatimes, ltn, tvbs, ettoday, ncku
@@ -54,9 +55,6 @@ def search_news( time_range: (datetime, datetime), keywords: list, media: Availa
         # SAMPLE RESPONSE FORMAT
         result = ["NO_URL", "無法判斷新聞媒體"]
 
-    # simplify news content
-    result[1] = result[1] + "..."
-
     BotLogger.debug(f""" Search News :
         Time Range  = {time_range.__str__()},
         Keywords    = {keywords.__str__()},
@@ -64,3 +62,16 @@ def search_news( time_range: (datetime, datetime), keywords: list, media: Availa
         Result      = {result}""")
 
     return result
+
+
+if __name__ == '__main__' :
+    time_range = DatetimeConverter.extract_datetime("三天前的新聞")
+    keywords = []
+
+    res = search_news(time_range, keywords, AvailableMedia.CHINATIME)
+
+    links = res[0].split("\n")
+    texts = res[1].split("\n")
+
+    print(links)
+    print(texts)
