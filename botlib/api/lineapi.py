@@ -27,6 +27,38 @@ class LineApi :
 
 
     @staticmethod
+    def send_audio( channel_token, reply_token, file_path: Path ) -> None :
+        """
+        傳送一個 audio 類別的 reply message
+
+        :param channel_token: line bot channel token
+        :param reply_token: reply token
+        :param file_path: audio message 的 local 路徑
+        :return: None
+        """
+
+        try :
+            # get audio file duration
+            audio_duration = AudioSegment.from_file(file_path).duration_seconds * 1000
+
+            # reply audio file (by url) with duration
+            audio_url = path.join(request.host_url, "audio", file_path.name).replace("http://", "https://")
+            api = LineBotApi(channel_access_token = channel_token)
+            api.reply_message(reply_token, AudioSendMessage(audio_url, duration = audio_duration))
+
+            BotLogger.debug(f"Audio Message '{file_path}' Sent.")
+
+        except FileNotFoundError as fe :
+            BotLogger.exception(f"Send Audio Failed, {file_path} FileNotFound : {fe}")
+
+        except TypeError as te :
+            BotLogger.exception(f"Send Audio Failed, {file_path} TypeError : {te}")
+
+        except Exception as e :
+            BotLogger.exception(f"Send Audio Failed, {type(e).__name__} : {e}")
+
+
+    @staticmethod
     def push_text( userid, channel_token, text_msg: str ) -> None :
         """
         以 push 的方式讓 bot 傳送文字訊息給 userid
@@ -135,15 +167,17 @@ class LineApi :
 
 
     @staticmethod
-    def make_audio_message_and_send( channel_token, userid, msg: str, language: BotResponseLanguage ) -> None :
+    def make_audio_message_and_send( channel_token, userid, reply_token, msg: str, language: BotResponseLanguage ) -> None :
         """
         利用 TTS 將文字訊息傳換成對應語言（BotResponseLanguage）
         然後將產生的 w4a 音訊檔傳送（push）給 user
 
         :param channel_token: line bot channel token
         :param userid: user line id to determine tmp file name
+        :param reply_token: token for replying specific message
         :param msg: text message that will be heard by user
         :param language: bot response audio language
+        :param postfix: postfix of audio file
         :return: None
         """
 
@@ -158,20 +192,25 @@ class LineApi :
             m4a_response_file_path = AudioConvert.wav_to_m4a(wav_tts_path)
 
             # reply this audio message
-            LineApi.push_audio(userid, channel_token, m4a_response_file_path)
-            BotLogger.info(f"Send Text {msg} \nAs Audio File : {m4a_response_file_path}")
+            try :
+                LineApi.send_audio(channel_token, reply_token, m4a_response_file_path)
+                BotLogger.info(f"Send Text {msg} \nAs Audio File : {m4a_response_file_path}")
+            except :
+                LineApi.push_audio(userid, channel_token, m4a_response_file_path)
+                BotLogger.info(f"Push Text {msg} \nAs Audio File : {m4a_response_file_path}")
 
         except Exception as e :
             BotLogger.exception(f"{type(e).__name__} Happened When Sending Audio Message.\n\t => {e}")
 
 
     @staticmethod
-    def send_response( userid, channel_token, response: BotResponse ) -> None :
+    def send_response( userid, channel_token, reply_token, response: BotResponse ) -> None :
         """
         依據 BotResponse 中設定的 response type 傳送（push）不同的回覆給 user
 
         :param userid: target user id
         :param channel_token: bot channel token
+        :param reply_token: reply token for this msg
         :param response: BotResponse instance
         :return: nothing
         """
