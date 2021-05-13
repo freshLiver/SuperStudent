@@ -194,10 +194,10 @@ class LineApi :
             # reply this audio message
             try :
                 LineApi.send_audio(channel_token, reply_token, m4a_response_file_path)
-                BotLogger.info(f"Send Text {msg} \nAs Audio File : {m4a_response_file_path}")
+                BotLogger.info(f"Send Text \n\t * {msg} \nAs Audio File : \n\t * {m4a_response_file_path}")
             except :
                 LineApi.push_audio(userid, channel_token, m4a_response_file_path)
-                BotLogger.info(f"Push Text {msg} \nAs Audio File : {m4a_response_file_path}")
+                BotLogger.info(f"Push Text \n\t * {msg} \nAs Audio File : \n\t * {m4a_response_file_path}")
 
         except Exception as e :
             BotLogger.exception(f"{type(e).__name__} Happened When Sending Audio Message.\n\t => {e}")
@@ -232,16 +232,18 @@ class LineApi :
                 BotLogger.warning(msg)
 
             # 網址數量與標題數量可能不同，必須以少量較少的作為訊息數量依據
-            for (text, link) in zip(texts, links) :
-                # send news title and audio
-                LineApi.push_text(userid, channel_token, link)
-                LineApi.make_audio_message_and_send(channel_token, userid, text + "...", response.language)
+            LineApi.push_text(userid, channel_token, response.url)
+            LineApi.make_audio_message_and_send(channel_token, userid, reply_token, response.text, response.language)
+            # for (text, link) in zip(texts, links) :
+            #     # send news title and audio
+            #     LineApi.push_text(userid, channel_token, link)
+            #     LineApi.make_audio_message_and_send(channel_token, userid, reply_token, text + "...", response.language)
 
         # ACTIVITY 類訊息，通常是查詢活動的結果，包含活動位置等資訊
         elif response.type == BotResponse.ACTIVITY :
             # make a location message
             LineApi.try_push_location(userid, channel_token, response.location)
-            LineApi.make_audio_message_and_send(channel_token, userid, response.text, response.language)
+            LineApi.make_audio_message_and_send(channel_token, userid, reply_token, response.text, response.language)
 
         else :
             BotLogger.error("Error Response Type, Should Not Be Here.")
