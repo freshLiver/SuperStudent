@@ -152,8 +152,14 @@ class SemanticAnalyzer :
         """
 
         # parse modified user speech
+        custom_dict = {
+            "自由時報" : "",
+            "中國時報" : "",
+            "成功大學" : "",
+        }
+
         BotLogger.info(f"Parsing Sentence : {self.parsed_content}")
-        ws_pos_ner = HanlpApi.parse_sentence(self.parsed_content)
+        ws_pos_ner = HanlpApi.parse_sentence(self.parsed_content, ws_custom_dict = custom_dict)
         BotLogger.info(BotLogger.prettify_dict_log(ws_pos_ner, "Parse Result : \n"))
 
         #
