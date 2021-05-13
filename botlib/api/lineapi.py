@@ -101,7 +101,8 @@ class LineApi :
             # push audio file (by url) with duration
             audio_url = path.join(request.host_url, "audio", w4a_audio_path.name).replace("http://", "https://")
 
-            LineBotApi(channel_token).push_message(userid, AudioMessage(audio_url, duration = audio_duration))
+            api = LineBotApi(channel_token)
+            api.push_message(userid, AudioMessage(audio_url, duration = audio_duration))
 
             BotLogger.debug(f"Audio Message '{w4a_audio_path}' Pushed.")
 
@@ -112,7 +113,7 @@ class LineApi :
             BotLogger.exception(f"Push Audio Failed, {w4a_audio_path} TypeError : {te}")
 
         except Exception as e :
-            BotLogger.exception(f"Push Audio Failed, {type(e).__name__} : {e}")
+            BotLogger.exception(f"Push Audio Failed, \n * {w4a_audio_path}\n * {type(e).__name__} : \n * {e}")
 
 
     @staticmethod
@@ -193,12 +194,12 @@ class LineApi :
             m4a_response_file_path = AudioConvert.wav_to_m4a(wav_tts_path)
 
             # reply this audio message
-            try :
-                LineApi.send_audio(channel_token, reply_token, m4a_response_file_path)
-                BotLogger.info(f"Send Text \n\t * {msg} \nAs Audio File : \n\t * {m4a_response_file_path}")
-            except :
-                LineApi.push_audio(userid, channel_token, m4a_response_file_path)
-                BotLogger.info(f"Push Text \n\t * {msg} \nAs Audio File : \n\t * {m4a_response_file_path}")
+            # try :
+            #     LineApi.send_audio(channel_token, reply_token, m4a_response_file_path)
+            #     BotLogger.info(f"Send Text \n\t * {msg} \nAs Audio File : \n\t * {m4a_response_file_path}")
+            # except :
+            LineApi.push_audio(userid, channel_token, m4a_response_file_path)
+            BotLogger.info(f"Push Text \n\t * {msg} \nAs Audio File : \n\t * {m4a_response_file_path}")
 
         except Exception as e :
             BotLogger.exception(f"{type(e).__name__} Happened When Sending Audio Message.\n\t => {e}")
