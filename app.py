@@ -68,7 +68,7 @@ def callback() :
                 # stt error, send response audio message
                 if speech_text is None :
                     response = BotResponse.make_inform_response("無法辨識內容，請再說一遍", BotResponseLanguage.CHINESE)
-                    LineApi.send_response(userid, channel_token, reply_token, response)
+                    LineApi.send_response(userid, channel_token, response)
                     BotLogger.info("Speech Text Is None.")
                     continue
 
@@ -82,7 +82,7 @@ def callback() :
 
                     # send response (None for no response)
                     if response is not None :
-                        LineApi.send_response(userid, channel_token, reply_token, response)
+                        LineApi.send_response(userid, channel_token, response)
                     else :
                         BotLogger.info(f"Match Service Return None, Request : {speech_text}")
 
