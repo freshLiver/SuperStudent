@@ -50,7 +50,20 @@ def parse(keyword: list, ty: (datetime, datetime)):
                 date = datetime.datetime.strptime(str(date_list[i]), '%Y-%m-%d %H:%M')
                 if ty[0] <= date <= ty[1]:
                     content_list[i] = re.sub('[a-zA-Z]', '', content_list[i])
-                    return [html_list[i], content_list[i].replace(u'\u3000', u' ').replace('\n', '')]
+                    content_list[i] = content_list[i].replace(u'\u3000', u' ').replace('\n', '')
+                    if content_list[i].find("。"):
+                        content_list[i] = content_list[i][:content_list[i].find("。")]
+                    elif len(content_list[i]) > 50:
+                        content_list[i] = content_list[i][:50]
+                    return [html_list[i], content_list[i]]
+                if i == 0:
+                    if_no_url = html_list[0]
+                    content_list[0] = re.sub('[a-zA-Z]', '', content_list[0])
+                    if_no_context = content_list[0].replace(u'\u3000', u' ').replace('\n', '')
+                    if if_no_context.find("。"):
+                        if_no_context = if_no_context[:if_no_context.find("。")]
+                    elif len(if_no_context) > 50:
+                        if_no_context = if_no_context[:50]
         chrome.close()
 
     else:
