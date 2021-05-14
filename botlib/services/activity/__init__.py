@@ -51,7 +51,7 @@ def create_activity( content: str, time_range: (datetime, datetime) ) -> str :
     return response
 
 
-def search_activity( keywords: list, time_range: (datetime, datetime) ) -> str or None :
+def search_activity( time_range: (datetime, datetime), keywords: list ) -> str or None :
     """
 
     :param keywords:

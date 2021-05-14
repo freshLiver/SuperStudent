@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-import os
+import os, sys
 
 # project libs
 from botlib import BotConfig
@@ -29,26 +29,28 @@ line_bot_api = LineBotApi(channel_access_token = BotConfig.LINE_CHANNEL_TOKEN)
 handler = WebhookHandler(channel_secret = BotConfig.LINE_CHANNEL_SECRET)
 parser = WebhookParser(channel_secret = BotConfig.LINE_CHANNEL_SECRET)
 
+sys.path.append(os.path.join(BotConfig.PROJECT_ROOT))
 
-# receive line message event
+
+# 接收 http POST requests
 @app.route("/post_message", methods = ['POST'])
 def callback() :
     signature = request.headers['X-Line-Signature']
     body = request.get_data(as_text = True)
     BotLogger.info(f"Get Request Body done, \n=> {body}")
 
-    # parse webhook body
+    # Parse Content
     try :
         events = parser.parse(body, signature)
 
-        # if event is MessageEvent and message is TextMessage
+        # 檢查各個 event
         for event in events :
-            # should be message event
+            # event 必須是 MessageEvent
             if not isinstance(event, MessageEvent) :
                 BotLogger.error("Not A MessageEvent, Ignored.")
                 continue
 
-            # check message type
+            # MessageEvent 的 message 需要是 Audio Message
             if isinstance(event.message, AudioMessage) :
 
                 # get userid, reply_token, channel_token
@@ -56,38 +58,39 @@ def callback() :
                 reply_token = event.reply_token
                 channel_token = BotConfig.LINE_CHANNEL_TOKEN
 
-                # save audio message as a file
+                # 將 User 傳送的 Audio Message 轉存為 m4a 音檔
                 m4a_tmp_path = LineApi.save_audio_message_as_m4a(userid, event.message, line_bot_api)
 
-                # convert m4a(raw audio message) to wav for stt
+                # 必須將 m4a 轉成 wav 才能進行 STT(語音辨識)
                 wav_tmp_path = AudioConvert.m4a_to_wav(m4a_tmp_path)
 
-                # do STT
+                # STT, 將 audio 的內容辨識成中文
                 speech_text = SpeechToText.chinese_to_cht(wav_tmp_path)
 
-                # stt error, send response audio message
+                # STT 發生問題, 傳送 INFORM RESPONSE
                 if speech_text is None :
-                    response = BotResponse.make_inform_response("無法辨識內容，請再說一遍", BotResponseLanguage.CHINESE)
+                    response = BotResponse.make_inform_response("語音辨識失敗，請再說一遍", BotResponseLanguage.CHINESE)
                     LineApi.send_response(userid, channel_token, response)
                     BotLogger.info("Speech Text Is None.")
                     continue
 
-                # parse user's speech content and get response
+                # 根據語音辨識內容進行對應工作，並回覆結果給 User
                 else :
+                    # 將辨識內容進行語意辨識
                     analyzer = SemanticAnalyzer(speech_text)
                     analyzer.parse_content()
 
-                    # get response base on analyze result
+                    # 根據語意辨識結果進行對應服務並獲得結果（RESPONSE）
                     response = match_service(analyzer = analyzer)
 
-                    # send response (None for no response)
+                    # 如果 RESPONSE 不為 None（不應為 None） 就根據 response 進行回應
                     if response is not None :
                         LineApi.send_response(userid, channel_token, response)
                     else :
-                        BotLogger.info(f"Match Service Return None, Request : {speech_text}")
+                        BotLogger.error(f"Match Service Return None, Request : {speech_text}")
 
 
-    # parse bot event failed
+    # 其他錯誤
     except InvalidSignatureError as e :
         BotLogger.exception(f"InvalidSignatureError : {e}")
         abort(400)
@@ -97,6 +100,12 @@ def callback() :
 
 @app.route("/audio/<path:filename>")
 def audio( filename ) :
+    """
+    用來獲取 output audio 的 http interface
+
+    :param filename: request 檔名
+    :return:
+    """
     try :
         BotLogger.info(f"Audio Request : audio/{filename}")
         return send_from_directory(BotConfig.AUDIO_OUTPUT_TMP_DIR, filename)
@@ -114,5 +123,4 @@ def home() :
 
 
 if __name__ == "__main__" :
-    # certificate and key files (root dir)
     app.run(host = '0.0.0.0', port = BotConfig.PORT, debug = True)

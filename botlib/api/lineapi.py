@@ -24,6 +24,8 @@ class LineApi :
     """
     Simplified LineAPIs
     """
+
+
     @staticmethod
     def push_text( userid, channel_token, text_msg: str ) -> None :
         """
@@ -85,12 +87,12 @@ class LineApi :
     @staticmethod
     def try_push_location( userid, channel_token, location: str or None ) -> None :
         """
-        Try To Push A LocationMessage
+        試著 Push 一個 LocationMessage
 
         if 'location' is :
             - None : do nothing
-            - not str : TypeError, do nothing except for Logging
-            - str : send a location message if 'address' and 'coordinate' both found
+            - not str : TypeError, 只紀錄 log
+            - str : 查詢地址以及座標，如果都有找到就傳送 LocationMessage
 
         :param userid: target user id
         :param channel_token: bot channel token
@@ -106,11 +108,11 @@ class LineApi :
             if type(location) is not str :
                 raise TypeError("Location Should Be A String.")
 
-            # get address adn coordinate of this location
+            # 查詢該地點的完整地址以及座標
             address = GeoApi.get_full_address(location)
             coordinate = GeoApi.get_coordinate(location)
 
-            # check coordinate value
+            # 如果地址或座標其中一項找不到就不 Push LocationMessage
             if coordinate is None or address is None :
                 raise ValueError(f"Cannot Find Address or Coordinate Of Location : {location}")
 
@@ -119,7 +121,7 @@ class LineApi :
             log += f"Coordinate : {coordinate}\n"
             BotLogger.info(log)
 
-            # if coordinate found, send location msg
+            # 如果有找到地址以及座標就 Push LocationMessage
             api = LineBotApi(channel_access_token = channel_token)
             loc_msg = LocationMessage(title = location, address = address, latitude = coordinate[0], longitude = coordinate[1])
             api.push_message(to = userid, messages = loc_msg)
@@ -177,7 +179,7 @@ class LineApi :
         :return: nothing
         """
 
-        # INFORM 類訊息，通常是用來傳送錯誤訊息
+        # INFORM 類訊息，通常是用來傳送「錯誤訊息」、「成功新增活動」
         if response.type == BotResponse.INFORM :
             LineApi.push_text(userid, channel_token, response.text)
 
@@ -193,16 +195,20 @@ class LineApi :
                 msg += f"\t links size = {links.__len__()}, texts size = {texts.__len__()}"
                 BotLogger.warning(msg)
 
-            # 網址以一個文字訊息傳送，內容則分成多個音訊傳送
+            # 網址以一個文字訊息傳送
             LineApi.push_text(userid, channel_token, response.url)
-            # LineApi.make_audio_message(channel_token, userid, reply_token, response.text, response.language)
-            for i, text in enumerate(texts) :
-                LineApi.make_audio_message(channel_token, userid, text, response.language, i)
+
+            # 新聞簡介則分成多個音訊傳送
+            for i, intro_text in enumerate(texts) :
+                LineApi.make_audio_message(channel_token, userid, intro_text, response.language, i)
 
         # ACTIVITY 類訊息，通常是查詢活動的結果，包含活動位置等資訊
         elif response.type == BotResponse.ACTIVITY :
-            # make a location message
+            # 根據 RESPONSE 的 LOCATION 查詢並傳送地點（如果沒找到地點就不傳送位置訊息）
             LineApi.try_push_location(userid, channel_token, response.location)
+            # 傳送文字訊息讓 User 知道自己說了什麼
+            LineApi.push_text(userid, channel_token, response.speech_text)
+            # 將「搜尋活動的結果轉成語音」並以「語音訊息」回覆 User
             LineApi.make_audio_message(channel_token, userid, response.text, response.language)
 
         else :

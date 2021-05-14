@@ -14,7 +14,8 @@ class BotResponse :
     INFORM = "INFORM"
 
 
-    def __init__( self, language: BotResponseLanguage ) :
+    def __init__( self, speech_text: str, language: BotResponseLanguage ) :
+        self.speech_text = speech_text
         self.url = ''
         self.text = ''
         self.location = ''
@@ -40,8 +41,8 @@ class BotResponse :
 
 
     @staticmethod
-    def make_news_response( url_text: [str, str], language: BotResponseLanguage ) -> 'BotResponse' :
-        response = BotResponse(language)
+    def make_news_response( speech_text: str, url_text: [str, str], language: BotResponseLanguage ) -> 'BotResponse' :
+        response = BotResponse(speech_text, language)
         response.type = BotResponse.NEWS
         response.url = url_text[0]
         response.text = url_text[1]
@@ -49,17 +50,17 @@ class BotResponse :
 
 
     @staticmethod
-    def make_activity_response( activity_content: str, location: str or None, language: BotResponseLanguage ) -> 'BotResponse' :
-        response = BotResponse(language)
+    def make_activity_response( speech_text: str, content: str, location: str or None, language: BotResponseLanguage ) -> 'BotResponse' :
+        response = BotResponse(speech_text, language)
         response.type = BotResponse.ACTIVITY
-        response.text = activity_content
+        response.text = content
         response.location = location
         return response
 
 
     @staticmethod
-    def make_inform_response( inform_content: str, language: BotResponseLanguage ) -> 'BotResponse' :
-        response = BotResponse(language)
+    def make_inform_response( speech_text: str, inform_content: str, language: BotResponseLanguage ) -> 'BotResponse' :
+        response = BotResponse(speech_text, language)
         response.type = BotResponse.INFORM
         response.text = inform_content
         return response
