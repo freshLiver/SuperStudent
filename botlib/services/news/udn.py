@@ -4,6 +4,7 @@ import re
 import datetime
 from selenium import webdriver
 import time
+from pathlib import Path
 
 html_list = []
 title_list = []
@@ -16,15 +17,16 @@ def parse(keyword: list, ty: (datetime, datetime)):
     if_no_context = "找不到相符結果"
     search_string = "https://udn.com/search/word/2/"
     if keyword:
-        for ele in keyword:
+        for ele in keyword :
             search_string = search_string + ele
-            if ele != keyword[-1]:
+            if ele != keyword[-1] :
                 search_string = search_string + "%20"
         # open chrome
-        chrome = webdriver.Chrome("./chromedriver")
+        driver_path = Path.joinpath(Path(__file__).parent, "chromedriver")
+        chrome = webdriver.Chrome(driver_path)
         chrome.get(search_string)
         chrome.fullscreen_window()
-        for x in range(1, 6):
+        for x in range(1, 6) :
             chrome.execute_script("window.scrollTo(0,document.body.scrollHeight)")
             time.sleep(0.5)
         # get soup
