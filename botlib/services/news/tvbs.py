@@ -55,7 +55,10 @@ def parse(keyword: list, ty: (datetime, datetime)):
                             t.text.replace("\r", "").replace("\n", "").replace('</p>', '').replace('<p>', '') for t in
                             text_list)
                         text = re.sub('[a-zA-Z]', '', text)
-                        text = text[0:50]
+                        if text.find("。"):
+                            text = text[:text.find("。")]
+                        elif len(text) > 50:
+                            text = text[:50]
                         return [html_list[j], text]
                 if i == 1:
                     response = rq.get(html_list[0])
@@ -65,7 +68,10 @@ def parse(keyword: list, ty: (datetime, datetime)):
                         t.text.replace("\r", "").replace("\n", "").replace('</p>', '').replace('<p>', '') for t in
                         text_list)
                     text = re.sub('[a-zA-Z]', '', text)
-                    text = text[0:50]
+                    if text.find("。"):
+                        text = text[:text.find("。")]
+                    elif len(text) > 50:
+                        text = text[:50]
                     if_no_url = html_list[0]
                     if_no_context = text
                 html_list.clear()
