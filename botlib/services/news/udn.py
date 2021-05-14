@@ -21,7 +21,7 @@ def parse(keyword: list, ty: (datetime, datetime)):
             if ele != keyword[-1]:
                 search_string = search_string + "%20"
         # open chrome
-        chrome = webdriver.Chrome("./chromedriver.exe")
+        chrome = webdriver.Chrome("./chromedriver")
         chrome.get(search_string)
         chrome.fullscreen_window()
         for x in range(1, 6):
