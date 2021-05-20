@@ -157,7 +157,7 @@ class LineApi :
             if language == BotResponseLanguage.CHINESE :
                 wav_tts_path = TextToSpeech.cht_to_chinese(audio_name = filename, cht_text = msg)
             else :
-                volume = 3
+                volume = 7
                 wav_tts_path = TextToSpeech.cht_to_taiwanese(audio_name = filename, cht_text = msg)
 
             # convert wav tts audio to m4a audio

@@ -199,7 +199,7 @@ class SemanticAnalyzer :
             elif self.is_create_activity() :
                 self.service = Services.CREATE_ACTIVITY
             else :
-                self.service = Services.SEARCH_ACTIVITY
+                self.service = Services.UNKNOWN
 
         else :
             self.service = Services.UNKNOWN
