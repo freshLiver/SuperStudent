@@ -25,6 +25,7 @@ def parse(keyword: list, ty: (datetime, datetime)):
         # set selenium web driver
         driver_path = Path.joinpath(Path(__file__).parent, "chromedriver")
         options = webdriver.ChromeOptions()
+        options.add_argument("--headless")
         options.add_argument("--no-sandbox")
         chrome = webdriver.Chrome(driver_path, options = options)
 
