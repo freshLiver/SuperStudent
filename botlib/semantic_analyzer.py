@@ -17,6 +17,10 @@ class SemanticAnalyzer :
     1. Target Service
     2. pnList, Events, Datetime Range, Locations
     """
+    NEWS_SEARCH_KEYWORDS = ["新聞", "報導"]
+    ACTIVITY_GENERAL_KEYWORDS = ["活動", "考試", "展", "演講", "遊行", "舉行", "舉辦", "會"]
+    ACTIVITY_SEARCH_KEYWORDS = ["查詢", "什麼", "想知道", "哪些"]
+    ACTIVITY_CREATE_KEYWORDS = ["有", "舉行", "舉辦", "開放", "加入"]
 
 
     def __init__( self, speech_text: str ) :
@@ -210,7 +214,7 @@ class SemanticAnalyzer :
 
         :return: is a news searching request
         """
-        for kw in ["新聞", "報導"] :
+        for kw in SemanticAnalyzer.NEWS_SEARCH_KEYWORDS :
             if kw in self.parsed_content :
                 return True
         return False
@@ -222,7 +226,7 @@ class SemanticAnalyzer :
 
         :return: is a activity request
         """
-        for kw in ["活動", "考試", "展", "演講"] :
+        for kw in SemanticAnalyzer.ACTIVITY_GENERAL_KEYWORDS :
             if kw in self.parsed_content :
                 return True
         return False
@@ -234,7 +238,7 @@ class SemanticAnalyzer :
 
         :return: is a activity searching request
         """
-        for keyword in ["查詢", "什麼", "想知道", "哪些"] :
+        for keyword in SemanticAnalyzer.ACTIVITY_SEARCH_KEYWORDS :
             if keyword in self.parsed_content :
                 return True
         return False
@@ -246,7 +250,7 @@ class SemanticAnalyzer :
 
         :return: is a activity searching request
         """
-        for keyword in ["有", "舉行", "舉辦"] :
+        for keyword in SemanticAnalyzer.ACTIVITY_CREATE_KEYWORDS :
             if keyword in self.parsed_content :
                 return True
         return False
