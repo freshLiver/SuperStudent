@@ -7,7 +7,7 @@ from botlib.botlogger import BotLogger
 from botlib.converter.datetime_converter import DatetimeConverter
 
 # import crawler
-from botlib.services.news import udn, chinatimes, ltn, tvbs, ettoday, ncku
+from botlib.services.news import udn, chinatimes, ltn, tvbs, ettoday, ncku, setn
 
 
 
@@ -15,12 +15,13 @@ class AvailableMedia(Enum) :
     """
     Available Media Enumeration
     """
-    NCKU = "成大新聞",
-    LTN = "自由時報",
-    CHINATIME = "中時電子報",
-    TVBS = "TVBS新聞網",
-    ETTODAY = "東森ETToday新聞雲",
+    NCKU = "成大新聞"
+    LTN = "自由時報"
+    CHINATIME = "中時電子報"
+    TVBS = "TVBS新聞網"
+    ETTODAY = "東森ETToday新聞雲"
     UDN = "聯合報"
+    SETN = "三立新聞"
 
 
 # ------------------------------------------------------------------------------------------------------------
@@ -51,9 +52,10 @@ def search_news( time_range: (datetime, datetime), keywords: list, media: Availa
         result = tvbs.parse(keywords, time_range)
     elif media == AvailableMedia.NCKU :
         result = ncku.parse(keywords, time_range)
+    elif media == AvailableMedia.SETN :
+        result = setn.parse(keywords, time_range)
     else :
-        # SAMPLE RESPONSE FORMAT
-        result = ["NO_URL", "無法判斷新聞媒體"]
+        result = ["NO_URL", "無法判斷新聞媒體"]  # SAMPLE RESPONSE FORMAT
 
     BotLogger.debug(f""" Search News :
         Time Range  = {time_range.__str__()},

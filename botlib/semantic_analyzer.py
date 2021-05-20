@@ -134,6 +134,8 @@ class SemanticAnalyzer :
             return news.AvailableMedia.ETTODAY
         if re.search("(UDN|聯合報)", cht_text, re.IGNORECASE) :
             return news.AvailableMedia.UDN
+        if re.search("三立(新聞)?", cht_text) :
+            return news.AvailableMedia.SETN
         if re.search("(成大|成功大學)", cht_text) :
             return news.AvailableMedia.NCKU
 

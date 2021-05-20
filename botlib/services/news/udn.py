@@ -21,9 +21,14 @@ def parse(keyword: list, ty: (datetime, datetime)):
             search_string = search_string + ele
             if ele != keyword[-1] :
                 search_string = search_string + "%20"
-        # open chrome
+
+        # set selenium web driver
         driver_path = Path.joinpath(Path(__file__).parent, "chromedriver")
-        chrome = webdriver.Chrome(driver_path)
+        options = webdriver.ChromeOptions()
+        options.add_argument("--headless")
+        chrome = webdriver.Chrome(driver_path, options = options)
+
+        # open chrome
         chrome.get(search_string)
         chrome.fullscreen_window()
         for x in range(1, 6) :
