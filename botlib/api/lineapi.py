@@ -151,14 +151,17 @@ class LineApi :
 
         try :
             # tts to wav file
+            volume = 1
             filename = f"{userid}_{seq}"
+
             if language == BotResponseLanguage.CHINESE :
                 wav_tts_path = TextToSpeech.cht_to_chinese(audio_name = filename, cht_text = msg)
             else :
+                volume = 3
                 wav_tts_path = TextToSpeech.cht_to_taiwanese(audio_name = filename, cht_text = msg)
 
             # convert wav tts audio to m4a audio
-            m4a_response_file_path = AudioConvert.wav_to_m4a(wav_tts_path)
+            m4a_response_file_path = AudioConvert.wav_to_m4a(wav_tts_path, volume)
 
             # reply this audio message
             LineApi.push_audio(userid, channel_token, m4a_response_file_path)

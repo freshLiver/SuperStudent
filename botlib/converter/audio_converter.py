@@ -14,6 +14,20 @@ class AudioConvert :
 
 
     @staticmethod
+    def ffmpeg_convert( in_file_path: Path, out_file_path: Path, volume: int ) -> None :
+        # run ffmpeg to convert audio format
+        try :
+            ffmpeg_log = "----------------------------------------------------------\n"
+            ffmpeg_log += popen(f"ffmpeg -y -i {in_file_path} -filter:a \"volume={volume}\" {out_file_path} 2>&1").read()
+            ffmpeg_log += "----------------------------------------------------------\n"
+
+            BotLogger.debug(ffmpeg_log)
+
+        except Exception as e :
+            BotLogger.exception(f"{type(e).__name__} = {e}")
+
+
+    @staticmethod
     def m4a_to_wav( m4a_file_path: Path ) -> Path :
         """
         convert a mpeg4 audio (.m4a) into wav audio file with postfix .wav
@@ -25,47 +39,32 @@ class AudioConvert :
 
         # output m4a file will be saved at same dir with .m4a postfix
         input_path = m4a_file_path.__str__()
-        output_path = input_path + ".wav"
+        output_path = Path(input_path + ".wav")
 
-        # run ffmpeg to convert audio format
-        try :
-            cmd_output = "----------------------------------------------------------"
-            cmd_output += popen(f"ffmpeg -y -i {input_path} {output_path} 2>&1").read()
-            cmd_output += "----------------------------------------------------------"
-
-            BotLogger.debug(cmd_output)
-
-        except Exception as e :
-            BotLogger.exception(f"{type(e).__name__} = {e}")
+        # convert wav to m4a with ffmpeg
+        AudioConvert.ffmpeg_convert(m4a_file_path, output_path, 1)
 
         # return full path of output audio file
         return Path(expanduser(output_path))
 
 
     @staticmethod
-    def wav_to_m4a( wav_file_path: Path ) -> Path :
+    def wav_to_m4a( wav_file_path: Path, volume = 1 ) -> Path :
         """
         convert a wav audio file into mpeg4 audio file (.m4a) with postfix .m4a
         and the output audio file will be saved at the audio_dir
 
         :param wav_file_path: input wav file path obj
+        :param volume: FFmpeg's volume audio filter
         :return: output file path obj
         """
 
         # output m4a file will be saved at same dir with .m4a postfix
         input_path = wav_file_path.__str__()
-        output_path = input_path + ".m4a"
+        output_path = Path(input_path + ".m4a")
 
-        try :
-            # run ffmpeg to convert audio format
-            cmd_output = "----------------------------------------------------------\n"
-            cmd_output += popen(f"ffmpeg -y -i {input_path} {output_path} 2>&1").read()
-            cmd_output += "----------------------------------------------------------\n"
-
-            BotLogger.debug(cmd_output)
-
-        except Exception as e :
-            BotLogger.exception(f"{type(e).__name__} = {e}")
+        # convert wav to m4a with ffmpeg
+        AudioConvert.ffmpeg_convert(wav_file_path, output_path, volume)
 
         # return full path of output audio file
         return Path(expanduser(output_path))
