@@ -65,7 +65,7 @@ def callback() :
                 wav_tmp_path = AudioConvert.m4a_to_wav(m4a_tmp_path)
 
                 # STT, 將 audio 的內容辨識成中文
-                speech_text = SpeechToText.chinese_to_cht(wav_tmp_path)
+                speech_text = SpeechToText.duo_lang_to_cht(wav_tmp_path)
 
                 # STT 發生問題, 傳送 INFORM RESPONSE
                 if speech_text is None :
