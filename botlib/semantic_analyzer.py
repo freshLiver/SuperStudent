@@ -26,10 +26,10 @@ class SemanticAnalyzer :
     def __init__( self, speech_text: str ) :
 
         # should parse and rm language specification part to avoid keywords mismatching
-        self.speech_text, self.response_language = self.__change_response_language(speech_text)
+        self.speech_text_no_lang, self.response_language = SemanticAnalyzer.__change_response_language(speech_text)
 
-        # must pass
-        self.parsed_content = DatetimeConverter.standardize_datetime(self.speech_text)
+        # parse datetime description and extract datetime range
+        self.parsed_content = DatetimeConverter.standardize_datetime(self.speech_text_no_lang)
         self.time_range = DatetimeConverter.extract_datetime(self.parsed_content)
 
         # information that extract from user speech
@@ -117,7 +117,6 @@ class SemanticAnalyzer :
 
         BotLogger.info(f"Extract keywords : {self.keywords}")
 
-
     @staticmethod
     def __extract_media( cht_text: str ) -> news.AvailableMedia or None :
         """
@@ -185,7 +184,7 @@ class SemanticAnalyzer :
             self.__extract_keywords(ws_pos_ner)
 
         # extract media from speech text
-        media = SemanticAnalyzer.__extract_media(self.speech_text)
+        media = SemanticAnalyzer.__extract_media(self.speech_text_no_lang)
         if media is not None :
             self.media = media
 

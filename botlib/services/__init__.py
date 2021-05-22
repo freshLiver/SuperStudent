@@ -40,9 +40,9 @@ def match_service( analyzer: 'SemanticAnalyzer' ) -> BotResponse or None :
     # * 回傳 INFORM RESPONSE 並附上辨識結果
     #
     if analyzer.service == Services.UNKNOWN :
-        error_msg = f"非常抱歉，我聽不懂您的需求 ({analyzer.speech_text})"
+        error_msg = f"非常抱歉，我聽不懂您的需求"
         BotLogger.info(f"Unknown Request = {analyzer.parsed_content}")
-        return BotResponse.make_inform_response(analyzer.speech_text, error_msg, analyzer.response_language)
+        return BotResponse.make_inform_response(analyzer.speech_text_no_lang, error_msg, analyzer.response_language)
     #
     #
     # 辨識結果為：搜尋新聞
@@ -55,10 +55,10 @@ def match_service( analyzer: 'SemanticAnalyzer' ) -> BotResponse or None :
         url_text = news.search_news(analyzer.time_range, analyzer.keywords, analyzer.media)
 
         if url_text[0] == "NO_URL" :
-            not_found_msg = f"找不到相符的新聞 ({analyzer.speech_text})"
-            return BotResponse.make_inform_response(analyzer.speech_text, not_found_msg, analyzer.response_language)
+            not_found_msg = f"找不到相符的新聞"
+            return BotResponse.make_inform_response(analyzer.speech_text_no_lang, not_found_msg, analyzer.response_language)
 
-        return BotResponse.make_news_response(analyzer.speech_text, url_text, analyzer.response_language)
+        return BotResponse.make_news_response(analyzer.speech_text_no_lang, url_text, analyzer.response_language)
     #
     #
     # 辨識結果為：搜尋活動
@@ -71,12 +71,12 @@ def match_service( analyzer: 'SemanticAnalyzer' ) -> BotResponse or None :
         result = activity.search_activity(analyzer.time_range, analyzer.keywords)
 
         if result is None :
-            not_found_msg = f"找不到活動 ({analyzer.speech_text})"
-            return BotResponse.make_inform_response(analyzer.speech_text, not_found_msg, analyzer.response_language)
+            not_found_msg = f"找不到活動"
+            return BotResponse.make_inform_response(analyzer.speech_text_no_lang, not_found_msg, analyzer.response_language)
         else :
             # 使用 hanlp 從「找到的活動」中找出 main location（longest location）
             location = HanlpApi.extract_location(result)
-            return BotResponse.make_activity_response(analyzer.speech_text, result, location, analyzer.response_language)
+            return BotResponse.make_activity_response(analyzer.speech_text_no_lang, result, location, analyzer.response_language)
     #
     #
     # 辨識結果為：新增活動
@@ -84,17 +84,20 @@ def match_service( analyzer: 'SemanticAnalyzer' ) -> BotResponse or None :
     # * 地點明確：回傳 INFORM RESPONSE 告知新增活動成功並附上辨識結果
     #
     elif analyzer.service == Services.CREATE_ACTIVITY :
-
         # 如果地點不明確則無法新增活動
         ambiguous_location = (analyzer.locations == [])
 
+        # include some location in campus
+        for campus_location in ["榕園", "系館", "總圖", "宿舍", "活動中心"] :
+            if campus_location in analyzer.speech_text_no_lang :
+                ambiguous_location = False
+
         if ambiguous_location :
-            error_msg = f"地點不明，請補上活動舉辦的地點後再說一次 ({analyzer.speech_text})"
-            return BotResponse.make_inform_response(analyzer.speech_text, error_msg, analyzer.response_language)
+            error_msg = f"地點不明，請補上活動舉辦的地點後再說一次"
+            return BotResponse.make_inform_response(analyzer.speech_text_no_lang, error_msg, analyzer.response_language)
         else :
             result = activity.create_activity(analyzer.parsed_content, analyzer.time_range)
-            result += f"({analyzer.speech_text})"
-            return BotResponse.make_inform_response(analyzer.speech_text, result, analyzer.response_language)
+            return BotResponse.make_inform_response(analyzer.speech_text_no_lang, result, analyzer.response_language)
     #
     #
     # 不屬於任何 Service

@@ -62,5 +62,5 @@ class BotResponse :
     def make_inform_response( speech_text: str, inform_content: str, language: BotResponseLanguage ) -> 'BotResponse' :
         response = BotResponse(speech_text, language)
         response.type = BotResponse.INFORM
-        response.text = inform_content
+        response.text = f"{inform_content} (語音辨識結果：{speech_text})"
         return response

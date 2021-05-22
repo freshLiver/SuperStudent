@@ -198,6 +198,9 @@ class LineApi :
                 msg += f"\t links size = {links.__len__()}, texts size = {texts.__len__()}"
                 BotLogger.warning(msg)
 
+            # 將使用者詢問內容以文字訊息傳送
+            LineApi.push_text(userid, channel_token, response.speech_text)
+
             # 網址以一個文字訊息傳送
             LineApi.push_text(userid, channel_token, response.url)
 
@@ -207,12 +210,12 @@ class LineApi :
 
         # ACTIVITY 類訊息，通常是查詢活動的結果，包含活動位置等資訊
         elif response.type == BotResponse.ACTIVITY :
-            # 根據 RESPONSE 的 LOCATION 查詢並傳送地點（如果沒找到地點就不傳送位置訊息）
-            LineApi.try_push_location(userid, channel_token, response.location)
             # 傳送文字訊息讓 User 知道自己說了什麼
             LineApi.push_text(userid, channel_token, response.speech_text)
             # 將「搜尋活動的結果轉成語音」並以「語音訊息」回覆 User
             LineApi.make_audio_message(channel_token, userid, response.text, response.language)
+            # 根據 RESPONSE 的 LOCATION 查詢並傳送地點（如果沒找到地點就不傳送位置訊息）
+            LineApi.try_push_location(userid, channel_token, response.location)
 
         else :
             BotLogger.error("Error Response Type, Should Not Be Here.")
