@@ -22,10 +22,10 @@ class SemanticAnalyzer :
     ACTIVITY_CREATE_KEYWORDS = ["有", "舉行", "舉辦", "開放", "加入"]
 
 
-    def __init__( self, speech_text: str ) :
+    def __init__( self, speech_text: str, default_response_lang: BotResponseLanguage ) :
 
         # should parse and rm language specification part to avoid keywords mismatching
-        self.speech_text_no_lang, self.response_language = SemanticAnalyzer.__change_response_language(speech_text)
+        self.speech_text_no_lang, self.response_language = SemanticAnalyzer.__change_response_language(speech_text, default_response_lang)
 
         self.speech_text_no_abbr = SemanticAnalyzer.__remove_speech_abbreviation(self.speech_text_no_lang)
 
@@ -72,7 +72,7 @@ class SemanticAnalyzer :
 
     # ------------------------------------------------------------------------------------------------------------
     @staticmethod
-    def __change_response_language( speech_text ) -> (str, BotResponseLanguage) :
+    def __change_response_language( speech_text, default_lang: BotResponseLanguage ) -> (str, BotResponseLanguage) :
         """
         extract and rm language specification part from speech text to avoid keywords mismatching
 
@@ -91,7 +91,7 @@ class SemanticAnalyzer :
             speech_text = re.sub(taiwanese_rule, "", speech_text)
             return speech_text, BotResponseLanguage.TAIWANESE
 
-        return speech_text, BotResponseLanguage.CHINESE
+        return speech_text, default_lang
 
 
     @staticmethod

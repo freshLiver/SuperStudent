@@ -22,6 +22,8 @@ class BotResponse :
         self.language = language
         self.type = BotResponse.INFORM
 
+        self.is_unknown_service = False
+
 
     def __str__( self ) -> str :
 
@@ -59,8 +61,9 @@ class BotResponse :
 
 
     @staticmethod
-    def make_inform_response( speech_text: str, inform_content: str, language: BotResponseLanguage ) -> 'BotResponse' :
+    def make_inform_response( speech_text: str, content: str, language: BotResponseLanguage, is_unknown_service = False ) -> 'BotResponse' :
         response = BotResponse(speech_text, language)
+        response.is_unknown_service = is_unknown_service
         response.type = BotResponse.INFORM
-        response.text = f"{inform_content} (語音辨識結果：{speech_text})"
+        response.text = f"{content} (語音辨識結果：{speech_text})"
         return response

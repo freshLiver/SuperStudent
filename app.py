@@ -9,7 +9,7 @@ from botlib.botlogger import BotLogger
 from botlib.botresponse import BotResponse, BotResponseLanguage
 from botlib.converter.audio_converter import AudioConvert
 from botlib.converter.speech_to_text import SpeechToText
-from botlib.services import match_service
+from botlib.services import match_service, Services
 from botlib.semantic_analyzer import SemanticAnalyzer
 
 # flask libs
@@ -65,35 +65,52 @@ def callback() :
                 wav_tmp_path = AudioConvert.m4a_to_wav(m4a_tmp_path)
 
                 # STT, 將 audio 的內容辨識成中文
-                speech_text = SpeechToText.duo_lang_to_cht(wav_tmp_path)
+                c2c_result, t2c_result = SpeechToText.duo_lang_to_cht(wav_tmp_path)
 
-                # STT 發生問題, 傳送 INFORM RESPONSE
-                if speech_text is None :
-                    response = BotResponse.make_inform_response("語音辨識失敗，請再說一遍", BotResponseLanguage.CHINESE)
-                    LineApi.send_response(userid, channel_token, response)
-                    BotLogger.info("Speech Text Is None.")
-                    continue
 
-                # 根據語音辨識內容進行對應工作，並回覆結果給 User
-                else :
+                def parse_content_and_match_service( stt_text: str, default_lang: BotResponseLanguage ) -> BotResponse :
                     # 將辨識內容進行語意辨識
-                    analyzer = SemanticAnalyzer(speech_text)
+                    analyzer = SemanticAnalyzer(stt_text, default_lang)
                     analyzer.parse_content()
 
                     # 根據語意辨識結果進行對應服務並獲得結果（RESPONSE）
-                    response = match_service(analyzer = analyzer)
-
-                    # 如果 RESPONSE 不為 None（不應為 None） 就根據 response 進行回應
-                    if response is not None :
-                        LineApi.send_response(userid, channel_token, response)
-                    else :
-                        BotLogger.error(f"Match Service Return None, Request : {speech_text}")
+                    return match_service(analyzer = analyzer)
 
 
-    # 其他錯誤
+                # check if c2c result meaningful
+                c2c_response = t2c_response = None
+                c2c_meaningful = t2c_meaningful = False
+
+                if c2c_result is not None :
+                    c2c_response = parse_content_and_match_service(c2c_result, BotResponseLanguage.CHINESE)
+                    c2c_meaningful = not c2c_response.is_unknown_service
+
+                # if c2c result not meaningful, check t2c result
+                if t2c_result is not None and c2c_meaningful == False :
+                    t2c_response = parse_content_and_match_service(t2c_result, BotResponseLanguage.TAIWANESE)
+                    t2c_meaningful = not t2c_response.is_unknown_service
+
+                # 兩種語言都辨識失敗（Unknown Service）
+                if c2c_meaningful == t2c_meaningful == False :
+                    err_msg = f"非常抱歉，我聽不懂你的需求，請再說一遍"
+                    speech_text = f"\n中文：({c2c_result})\n台語：({t2c_result}\n)"
+                    response = BotResponse.make_inform_response(speech_text, err_msg, BotResponseLanguage.CHINESE)
+
+                # 中文或台語辨識成功
+                else :
+                    response = c2c_response if c2c_meaningful else t2c_response
+
+                # 傳送 response
+                LineApi.send_response(userid, channel_token, response)
+
+
     except InvalidSignatureError as e :
         BotLogger.exception(f"InvalidSignatureError : {e}")
         abort(400)
+
+    # 其他錯誤
+    except Exception as e :
+        BotLogger.error(f"ERROR {type(e).__name__} \n\t=> {e}")
 
     return "OK"
 

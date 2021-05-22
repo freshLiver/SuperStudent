@@ -4,7 +4,6 @@ from pathlib import Path
 # project lib
 from botlib.botlogger import BotLogger
 from botlib.api.labapi import LabApi
-from botlib.api.hanlpapi import HanlpApi
 
 
 
@@ -15,21 +14,12 @@ class SpeechToText :
 
 
     @staticmethod
-    def duo_lang_to_cht( wav_audio_path: Path ) -> str or None :
+    def duo_lang_to_cht( wav_audio_path: Path ) -> (str, str) :
 
         c2c_result = SpeechToText.chinese_to_cht(wav_audio_path)
         t2c_result = SpeechToText.taiwanese_to_cht(wav_audio_path)
 
-        # compare 2 result
-        c2c_ws_pos_ner = HanlpApi.parse_sentence(c2c_result)
-        t2c_ws_pos_ner = HanlpApi.parse_sentence(t2c_result)
-
-        if len(c2c_ws_pos_ner["WS"]) <= len(t2c_ws_pos_ner["WS"]) :
-            BotLogger.info("DuoLangResult : C2C")
-            return c2c_result
-        else :
-            BotLogger.info("DuoLangResult : T2C")
-            return t2c_result
+        return c2c_result, t2c_result
 
 
     @staticmethod

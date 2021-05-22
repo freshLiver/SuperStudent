@@ -42,7 +42,7 @@ def match_service( analyzer: 'SemanticAnalyzer' ) -> BotResponse or None :
     if analyzer.service == Services.UNKNOWN :
         error_msg = f"非常抱歉，我聽不懂您的需求"
         BotLogger.info(f"Unknown Request = {analyzer.parsed_content}")
-        return BotResponse.make_inform_response(analyzer.speech_text_no_lang, error_msg, analyzer.response_language)
+        return BotResponse.make_inform_response(analyzer.speech_text_no_lang, error_msg, analyzer.response_language, True)
     #
     #
     # 辨識結果為：搜尋新聞
