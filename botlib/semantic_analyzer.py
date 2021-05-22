@@ -178,7 +178,7 @@ class SemanticAnalyzer :
         custom_dict = {
             "自由時報" : "",
             "中國時報" : "",
-            "成功大學" : "",
+            "成功大學光復宿舍" : "",
         }
 
         BotLogger.info(f"Parsing Sentence : {self.parsed_content}")

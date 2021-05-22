@@ -19,7 +19,7 @@ class GeoApi :
         :param address:
         :return:
         """
-        location = GeoApi.geo_locator.geocode(address)
+        location = GeoApi.geo_locator.geocode(address, country_codes = "tw")
 
         if location is None :
             return None
@@ -38,7 +38,7 @@ class GeoApi :
         :param address: location string
         :return:
         """
-        location = GeoApi.geo_locator.geocode(address)
+        location = GeoApi.geo_locator.geocode(address, country_codes = "tw")
 
         if location is None :
             return None
@@ -51,7 +51,7 @@ class GeoApi :
 
 if __name__ == '__main__' :
 
-    location = "成功大學"
+    location = "清華大學"
 
     address = GeoApi.get_full_address(location)
     coordinate = GeoApi.get_coordinate(location)
