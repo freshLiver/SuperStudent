@@ -1,8 +1,7 @@
 # project libs
-import re, json
+import re
 
 from botlib.api.hanlpapi import HanlpApi, NerCatalogs
-from botlib.api.labapi import LabApi
 from botlib.botlogger import BotLogger
 from botlib.converter.datetime_converter import DatetimeConverter
 from botlib.services import Services, news
@@ -28,8 +27,10 @@ class SemanticAnalyzer :
         # should parse and rm language specification part to avoid keywords mismatching
         self.speech_text_no_lang, self.response_language = SemanticAnalyzer.__change_response_language(speech_text)
 
+        self.speech_text_no_abbr = SemanticAnalyzer.__remove_speech_abbreviation(self.speech_text_no_lang)
+
         # parse datetime description and extract datetime range
-        self.parsed_content = DatetimeConverter.standardize_datetime(self.speech_text_no_lang)
+        self.parsed_content = DatetimeConverter.standardize_datetime(self.speech_text_no_abbr)
         self.time_range = DatetimeConverter.extract_datetime(self.parsed_content)
 
         # information that extract from user speech
@@ -93,6 +94,22 @@ class SemanticAnalyzer :
         return speech_text, BotResponseLanguage.CHINESE
 
 
+    @staticmethod
+    def __remove_speech_abbreviation( speech_text_no_lang: str ) -> str :
+
+        result = speech_text_no_lang
+
+        abbr_dict = {
+            "台北101" : "台北101大樓", "北捷" : "台北捷運",
+            "台大" : "台灣大學", "清大" : "清華大學", "交大" : "交通大學", "成大" : "成功大學"
+        }
+
+        for abbr in abbr_dict :
+            result = result.replace(abbr, abbr_dict[abbr])
+
+        return result
+
+
     def __extract_keywords( self, ws_pos_ner: dict ) :
 
         # stupidly rm repeat items
@@ -116,6 +133,7 @@ class SemanticAnalyzer :
             self.keywords.append(keyword)
 
         BotLogger.info(f"Extract keywords : {self.keywords}")
+
 
     @staticmethod
     def __extract_media( cht_text: str ) -> news.AvailableMedia or None :
@@ -184,7 +202,7 @@ class SemanticAnalyzer :
             self.__extract_keywords(ws_pos_ner)
 
         # extract media from speech text
-        media = SemanticAnalyzer.__extract_media(self.speech_text_no_lang)
+        media = SemanticAnalyzer.__extract_media(self.speech_text_no_abbr)
         if media is not None :
             self.media = media
 
