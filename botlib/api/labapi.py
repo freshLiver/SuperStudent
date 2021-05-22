@@ -4,44 +4,38 @@ from json import loads
 from pathlib import Path
 
 # project libs
-from botlib.botlogger import BotLogger
 from botlib import BotConfig
+from botlib.botlogger import BotLogger
+from botlib.converter.audio_converter import AudioConvert
 
 
 
 class LabApi :
 
     @staticmethod
-    def __format_data( token: str, raw_data: str ) -> bytes :
-        """
-        convert raw data to WMMKS Lab's api format
-        
-        :param token: user api token
-        :param raw_data: data will be send to server
-        :return: formatted data
-        """
+    def __format_text_data( token: str, raw_text: str ) -> bytes :
 
         # concatenate user token and data with @@@, and convert to bytes
-        formatted_data = bytes(token + "@@@" + raw_data, "utf-8")
+        data = bytes(token + "@@@" + raw_text, "utf-8")
 
         # convert msg msg length(unsigned int) to bytes, and put before msg
-        formatted_data = struct.pack(">I", len(formatted_data)) + formatted_data
+        data = struct.pack(">I", len(data)) + data
 
-        return formatted_data
+        return data
 
 
     @staticmethod
-    def __base_sender( token: str, raw_data: str, host_port: tuple ) -> bytes or None :
-        """
-        WMMKS lab's api handler,
-        this method will convert raw data into lab data's format,
-        and then send to server and get response in bytes (or None while something wrong)
-        
-        :param token: user token of target WMMKS lab's api
-        :param raw_data: data will be send to server
-        :param host_port: api's host ip and port
-        :return: byte data or None
-        """
+    def __format_audio_data( token: str, audio_path: Path ) -> bytes :
+
+        audio_data = open(audio_path, "rb").read()
+        data = bytes(token + "@@@", "utf-8") + struct.pack("8s", bytes("main", encoding = "utf8")) + b"P" + audio_data
+        data = struct.pack(">I", len(data)) + data
+
+        return data
+
+
+    @staticmethod
+    def __base_sender( data: bytes, host_port: tuple ) -> bytes or None :
 
         # response data
         response = None
@@ -55,7 +49,7 @@ class LabApi :
             BotLogger.debug("Connecting To Lab API Done")
 
             # send data to server
-            api.sendall(LabApi.__format_data(token = token, raw_data = raw_data))
+            api.sendall(data)
             BotLogger.debug("Sending Data To Lab API Done.")
 
             # recv ALL byte from server and return data
@@ -99,7 +93,8 @@ class LabApi :
         token = BotConfig.LAB_NER_TOKEN
 
         # send content to server and recv ner result
-        result = LabApi.__base_sender(token, cht_text, BotConfig.LAB_NER_HOST_PORT)
+        data = LabApi.__format_text_data(token, cht_text)
+        result = LabApi.__base_sender(data, BotConfig.LAB_NER_HOST_PORT)
 
         # decode as utf-8 and convert to dict
         if result is not None :
@@ -111,13 +106,13 @@ class LabApi :
 
 
     @staticmethod
-    def lab_c2t_api( userid: str, cht_text: str ) -> Path or None :
+    def lab_c2t_api( output_filename: str, cht_text: str ) -> Path or None :
         """
         WMMKS Lab's CHT Text to Taiwanese Speech System API,
         this method will convert cht text into taiwanese speech
         and then save as audio_output_dir/userid.wav
         
-        :param userid: line user id, which will be then filename of tmp speech output file
+        :param output_filename: line user id, which will be then filename of tmp speech output file
         :param cht_text: cht text which will be convert to taiwanese speech
         :return: taiwanese speech audio file's abs path (None if something wrong)
         """
@@ -126,13 +121,14 @@ class LabApi :
         token = BotConfig.LAB_C2T_TOKEN
 
         # send text to server and get result
-        speech_data = LabApi.__base_sender(token, cht_text, BotConfig.LAB_C2T_HOST_PORT)
+        data = LabApi.__format_text_data(token, cht_text)
+        speech_data = LabApi.__base_sender(data, BotConfig.LAB_C2T_HOST_PORT)
 
         # if result not None, output bytes to file.wav
         if speech_data is not None :
             try :
                 # determine speech output dir
-                output = BotConfig.file_path_from(BotConfig.AUDIO_OUTPUT_TMP_DIR, userid, ".wav")
+                output = BotConfig.file_path_from(BotConfig.AUDIO_OUTPUT_TMP_DIR, output_filename, ".wav")
 
                 # output api response bytes to target file
                 with open(output, "wb") as file :
@@ -147,11 +143,42 @@ class LabApi :
         return None
 
 
+    @staticmethod
+    def lab_t2c_api( taiwanese_text: str ) -> str :
+
+        token = BotConfig.LAB_T2C_TOKEN
+
+        data = LabApi.__format_text_data(token, taiwanese_text)
+        result = LabApi.__base_sender(data, BotConfig.LAB_T2C_HOST_PORT)
+
+        return result.decode("utf-8")
+
+
+    @staticmethod
+    def lab_tstt_api( wav_16khz_audio_path: Path ) -> str :
+
+
+        data = LabApi.__format_audio_data(BotConfig.LAB_TSTT_TOKEN, wav_16khz_audio_path)
+        bytes_result = LabApi.__base_sender(data, BotConfig.LAB_TSTT_HOST_PORT)
+
+        result = bytes_result.decode("utf-8")
+        # get best match
+        try :
+            return result.split("1.")[1].split(" ")[0]
+        except :
+            return ""
+
+
 if __name__ == '__main__' :
     from pprint import pprint
 
 
 
-    # res = LabApi.lab_ner_api("我想知道今天成功大學的新聞")
-    res = LabApi.lab_c2t_api("test", "此一系統包含一個約拾萬詞的詞彙庫及附加詞類、詞頻、詞類頻率、雙連詞類頻率等資料。")
+    wav_path = LabApi.lab_c2t_api("test_tai", "我今天肚子不舒服")
+    out_path = Path(wav_path.__str__() + "_16k.wav")
+    AudioConvert.ffmpeg_convert(wav_path, out_path, 2, 16000)
+    path = Path(out_path)
+    ttext = LabApi.lab_tstt_api(path)
+    res = LabApi.lab_t2c_api("")
+
     pprint(res)

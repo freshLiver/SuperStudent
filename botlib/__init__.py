@@ -43,10 +43,14 @@ class BotConfig :
     # lab api tokens
     LAB_NER_TOKEN = str(__CONFIG_FILE["LABAPI"]["lab_ner_token"])
     LAB_C2T_TOKEN = str(__CONFIG_FILE["LABAPI"]["lab_c2t_token"])
+    LAB_TSTT_TOKEN = str(__CONFIG_FILE["LABAPI"]["lab_tstt_token"])
+    LAB_T2C_TOKEN = str(__CONFIG_FILE["LABAPI"]["lab_t2c_token"])
 
     # lab api hosts and ports
     LAB_NER_HOST_PORT = ("140.116.245.151", 9921)
     LAB_C2T_HOST_PORT = ("140.116.245.147", 50010)
+    LAB_TSTT_HOST_PORT = ("140.116.245.149", 2802)
+    LAB_T2C_HOST_PORT = ("140.116.245.149", 27002)
 
 
     # -------------------------------------------------------------------------------------------------------

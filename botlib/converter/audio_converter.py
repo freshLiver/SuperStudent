@@ -14,11 +14,14 @@ class AudioConvert :
 
 
     @staticmethod
-    def ffmpeg_convert( in_file_path: Path, out_file_path: Path, volume: int ) -> None :
+    def ffmpeg_convert( in_file_path: Path, out_file_path: Path, volume: int, sample_rate = -1 ) -> None :
         # run ffmpeg to convert audio format
         try :
+            rate_conf = "" if sample_rate == -1 else f"-ar {sample_rate}"
+            volume_conf = f"-filter:a \"volume={volume}\""
+
             ffmpeg_log = "----------------------------------------------------------\n"
-            ffmpeg_log += popen(f"ffmpeg -y -i {in_file_path} -filter:a \"volume={volume}\" {out_file_path} 2>&1").read()
+            ffmpeg_log += popen(f"ffmpeg -y -i {in_file_path} {volume_conf} {rate_conf} {out_file_path} 2>&1").read()
             ffmpeg_log += "----------------------------------------------------------\n"
 
             BotLogger.debug(ffmpeg_log)
@@ -42,7 +45,7 @@ class AudioConvert :
         output_path = Path(input_path + ".wav")
 
         # convert wav to m4a with ffmpeg
-        AudioConvert.ffmpeg_convert(m4a_file_path, output_path, 1)
+        AudioConvert.ffmpeg_convert(m4a_file_path, output_path, 1, 16000)
 
         # return full path of output audio file
         return Path(expanduser(output_path))
