@@ -17,7 +17,7 @@ class SemanticAnalyzer :
     2. pnList, Events, Datetime Range, Locations
     """
     NEWS_SEARCH_KEYWORDS = ["新聞", "報導"]
-    ACTIVITY_GENERAL_KEYWORDS = ["活動", "考試", "展", "演講", "遊行", "舉行", "舉辦", "會"]
+    ACTIVITY_GENERAL_KEYWORDS = ["活動", "考試", "展", "演講", "遊行", "舉行", "舉辦", "會", "比賽", "賽事", "競賽"]
     ACTIVITY_SEARCH_KEYWORDS = ["查詢", "什麼", "想知道", "哪些"]
     ACTIVITY_CREATE_KEYWORDS = ["有", "舉行", "舉辦", "開放", "加入"]
 

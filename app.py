@@ -93,7 +93,7 @@ def callback() :
                 # 兩種語言都辨識失敗（Unknown Service）
                 if c2c_meaningful == t2c_meaningful == False :
                     err_msg = f"非常抱歉，我聽不懂你的需求，請再說一遍"
-                    speech_text = f"\n中文：({c2c_result})\n台語：({t2c_result}\n)"
+                    speech_text = f"\n中文：({c2c_result})\n台語：({t2c_result})\n"
                     response = BotResponse.make_inform_response(speech_text, err_msg, BotResponseLanguage.CHINESE)
 
                 # 中文或台語辨識成功
