@@ -31,7 +31,18 @@ class DatetimeConverter :
     __HOUR___UNIT_FMT = "(小?時|鐘頭|點)"
     __MINUTE_UNIT_FMT = "分鐘?"
 
-    __CHT_NUMBER_FMT = "[零一二兩三四五六七八九十]+"
+    __DATETIME_UNIT_FMT_MAP = {
+        __YEAR___UNIT_FMT : "%Y年",
+        __MONTH__UNIT_FMT : "%m月",
+        __DATE___UNIT_FMT : "%d日",
+        __HOUR___UNIT_FMT : "%H點",
+        __MINUTE_UNIT_FMT : "%M分"
+    }
+
+    __STD_DATE_FMT = "%Y年%m月%d日"
+    __STD_DATETIME_FMT = f"{__STD_DATE_FMT}%H點%M分"
+
+    __CHT_NUMBER_FMT = "[零一二兩三四五六七八九十0123456789]+"
     __CHT_DATETIME_FMT = f"({__CHT_NUMBER_FMT}個?{__YEAR___UNIT_FMT})?[又]?"
     __CHT_DATETIME_FMT += f"({__CHT_NUMBER_FMT}個?{__MONTH__UNIT_FMT})?[又]?"
     __CHT_DATETIME_FMT += f"({__CHT_NUMBER_FMT}個?{__WEEK___UNIT_FMT})?[又]?"
@@ -62,9 +73,6 @@ class DatetimeConverter :
 
     __ARABIC_DATETIME_RANGE_FMT = f"從?{__ARABIC_DATETIME_FMT}(到{__ARABIC_DATETIME_FMT})?"
     __ARABIC_DATETIME_RANGE_RULE = re.compile(__ARABIC_DATETIME_RANGE_FMT)
-
-    __STD_DATE_FMT = "%Y年%m月%d日"
-    __STD_DATETIME_FMT = f"{__STD_DATE_FMT}%H點%M分"
 
 
     # ----------------------------------------------------------------------------------
@@ -298,6 +306,23 @@ class DatetimeConverter :
 
 
     @staticmethod
+    def get_min_real_datetime_text( dt_str: str, dt: datetime.datetime ) -> str :
+
+        # datetime format : value
+        result_datetime_fmt = DatetimeConverter.__STD_DATETIME_FMT
+
+        # 以原字串的最小時間單位作為基礎
+        for fmt in DatetimeConverter.__DATETIME_UNIT_FMT_MAP.__reversed__() :
+            if re.findall(fmt, dt_str) == [] :
+                result_datetime_fmt = result_datetime_fmt.replace(DatetimeConverter.__DATETIME_UNIT_FMT_MAP[fmt], "")
+            else :
+                break
+
+        # 以最簡表示取代原時間字串
+        return dt.strftime(result_datetime_fmt)
+
+
+    @staticmethod
     def get_real_datetime_text( arabic_value_datetime_text: str ) -> str :
         """
         以「阿拉伯數值」表示的「相對時間（例如：1個月3天5小時後、2天前）」的字串轉成 年月日時分 表示（以當前時間作為基準）
@@ -328,15 +353,13 @@ class DatetimeConverter :
             for past_text in past_texts :
                 clean_past_text = past_text.replace("個", "").replace("又", "")
                 real_datetime = DatetimeConverter.to_datetime(clean_past_text, from_now = True, is_past = True)
-                formatted_real_datetime = real_datetime.strftime(DatetimeConverter.__STD_DATETIME_FMT)
-                result = result.replace(past_text, formatted_real_datetime)
+                result = result.replace(past_text, DatetimeConverter.get_min_real_datetime_text(clean_past_text, real_datetime))
 
             # 處理所有未來字串
             for future_text in future_texts :
                 clean_future_text = future_text.replace("個", "").replace("又", "")
                 real_datetime = DatetimeConverter.to_datetime(clean_future_text, from_now = True)
-                formatted_real_datetime = real_datetime.strftime(DatetimeConverter.__STD_DATETIME_FMT)
-                result = result.replace(future_text, formatted_real_datetime)
+                result = result.replace(future_text, DatetimeConverter.get_min_real_datetime_text(clean_future_text, real_datetime))
 
             return result
 
@@ -361,7 +384,7 @@ class DatetimeConverter :
         for cht_datetime_match in cht_datetime_matches :
             match_text = cht_datetime_match.group()
             # 只要有任何「數值為中文的 datetime substring」就建立字典（原時間字串：處理後的時間字串）
-            if re.search('[一二三四五六七八九十]', match_text) is not None :
+            if re.search(DatetimeConverter.__CHT_NUMBER_FMT, match_text) is not None :
                 datetime_dict[match_text] = ""
 
         # 如果沒有任何「數值為中文的 datetime substring」就直接回傳原字串
@@ -443,6 +466,6 @@ if __name__ == '__main__' :
 
     # print(res)
     # res = DatetimeConverter.abs_future_time(res)
-    text = "七十七分鐘前"
-    res = DatetimeConverter.extract_datetime(text)
+    text = "5天三小時後有什麼活動"
+    res = DatetimeConverter.standardize_datetime(text)
     print(res)
